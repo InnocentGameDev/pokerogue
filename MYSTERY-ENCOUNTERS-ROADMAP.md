@@ -1,15 +1,17 @@
 Current "Events" Implementation Roadmap:
 
-Phase 0: Exploration phase
-1) Find whatever the hell in the code "moves" the player from floor to floor (ie what in the code ends one shop and starts the next fight)
-2) Find/learn what constitutes an entire battle.
+# Phase 0: Exploration phase
+Find whatever the hell in the code "moves" the player from floor to floor (ie what in the code ends one shop and starts the next fight). 
+## DONE by imperialsympathizer
+Find/learn what constitutes an entire battle.
+## Done! by imperialsympathizer
 
-Phase 1: Modifying the framework that decides between static floors and wild/trainer encounters
+# Phase 1: Modifying the framework that decides between static floors and wild/trainer encounters
 3) Copy / paste the battle stage as a basis for working on Events.
 4) Force floor 3 to always be our custom "battle-stage", which I'll name event.
 5) Force floor 3's event to always be a Cosmog battle.
 
-Phase 2: Creating the first Event -- and exiting from it.
+# Phase 2: Creating the first Event -- and exiting from it.
 6) Remove battle features one by one until only player sprite, Cosmog and menu remains.
 7) Instead of a fight, prompt a dialogue from Cosmog, who offers you a Masterball, if you like it (or any other placeholder text).
 8) "Fight" option should be "Accept". "Ball" option should be "Refuse".

@@ -42,7 +42,7 @@ export class MysteryEncounterPhase extends Phase {
     // Ideally, the OptionSelectMysteryEncounter should create its own options array on initialization based on the Encounter type
     const options: OptionSelectItem[] = [
       {
-        label: "Option 2",
+        label: "Option 1",
         handler: () => {
           // Do stuff
           return true;
