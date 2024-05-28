@@ -99,11 +99,21 @@ export class GameMode implements GameModeConfig {
     }
   }
 
+  /** Wave 3 as Mystery Encounter is purely for testing purposes
+ * It also checks to avoid gyms, bosses and the rival fights.
+ * Also takes out the last two biomes (181-199)
+*/
+
+  isMysteryEncounter(waveIndex: integer): boolean {
+    return waveIndex === 3 || (Math.random() < 0.15 && waveIndex % 10 !== 0 && ![8, 25, 55, 95, 145] && !(waveIndex >= 181 && waveIndex <= 199));
+  }
+
+
   isWaveTrainer(waveIndex: integer, arena: Arena): boolean {
     if (this.isDaily) {
       return waveIndex % 10 === 5 || (!(waveIndex % 10) && waveIndex > 10 && !this.isWaveFinal(waveIndex));
     }
-    if ((waveIndex % 30) === (arena.scene.offsetGym ? 0 : 20) && !this.isWaveFinal(waveIndex)) {
+    if ((waveIndex % 30) === (arena.scene.offsetGym ? 0 : 20) && !this.isMysteryEncounter && !this.isWaveFinal(waveIndex))  {
       return true;
     } else if (waveIndex % 10 !== 1 && waveIndex % 10) {
       const trainerChance = arena.getTrainerChance();
