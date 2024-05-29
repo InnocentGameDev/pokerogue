@@ -1,13 +1,36 @@
+# Things to (eventually) be done for Mystery Encounters ("MEs"):
+
+- Add MEs to gamemodes Classic and Endless (done by @imperialsympathizer at gamemodes.ts)
+- MEs need to have a chance to spawn (done by @asdar) (needs revision, has placeholder at floor 3)
+
+- A MEs should always require:
+    - A wave index where they're happening -- each ME takes up a whole wave.
+    - A sprite (of a Pokémon or trainer you're interacting with)
+    - An opening dialogue (that sits where the enemy HP bars would be)
+    - An option panel at the bottom, taking the space of what usually is the game dialogs + controls
+    - __At least two "choices"__, and up to four.
+    - In what Biomes the ME happens, if applicable.
+    - Rarity tier of the ME, common by default. 
+        Rarities should follow the tiers of Pokémons in Biomes, so "Common, "Rare", "Super Rare" (SR), and "Ultra Rare" (UR).
+
+- "Choices" can call one simple event or multiple. Some events which should be callable in the choices:
+    - Force a fight with a Pokémon. Can be a fixed Pokémon o
+
+
+- A MEs creation "template" of some sort should exist, probably in a file in where all already written MEs exist
+
+
+
+
+
+
+
+
 Current "Events" Implementation Roadmap:
 
-# Phase 0: Exploration phase
-Find whatever the hell in the code "moves" the player from floor to floor (ie what in the code ends one shop and starts the next fight). 
-## DONE by imperialsympathizer
-Find/learn what constitutes an entire battle.
-## Done! by imperialsympathizer
+
 
 # Phase 1: Modifying the framework that decides between static floors and wild/trainer encounters
-3) Copy / paste the battle stage as a basis for working on Events.
 4) Force floor 3 to always be our custom "battle-stage", which I'll name event.
 5) Force floor 3's event to always be a Cosmog battle.
 
