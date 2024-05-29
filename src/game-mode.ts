@@ -102,6 +102,7 @@ export class GameMode implements GameModeConfig {
   /** Wave 3 as Mystery Encounter is purely for testing purposes
  * It also checks to avoid gyms, bosses and the rival fights.
  * Also takes out the last two biomes (181-199)
+ * Finally, added a check trainer waves to not step on Mystery Encounters
 */
 
   isMysteryEncounter(waveIndex: integer): boolean {
