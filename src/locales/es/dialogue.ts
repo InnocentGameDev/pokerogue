@@ -36,7 +36,7 @@ export const PGMdialogue: DialogueTranslationEntries = {
   },
   "lass": {
     "encounter": {
-      1: "Let's have a battle, shall we?",
+      1: "¿Tengamos una batalla, vale?",
       2: "You look like a new trainer. Let's have a battle!",
       3: "I don't recognize you. How about a battle?",
       4: "Let's have a fun Pokémon battle!",
