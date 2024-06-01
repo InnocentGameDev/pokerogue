@@ -4,11 +4,11 @@ export const modifierType: ModifierTypeTranslationEntries = {
   ModifierType: {
     "AddPokeballModifierType": {
       name: "{{modifierCount}}x {{pokeballName}}",
-      description: "Recibes {{modifierCount}}x {{pokeballName}} (En inventario: {{pokeballAmount}}) \nRatio de captura: {{catchRate}}",
+      description: "Recibes {{modifierCount}}x {{pokeballName}} (En inventario: {{pokeballAmount}}) \nRatio de captura: {{catchRate}}.",
     },
     "AddVoucherModifierType": {
       name: "{{modifierCount}}x {{voucherTypeName}}",
-      description: "Recibes {{modifierCount}}x {{voucherTypeName}}",
+      description: "Recibes {{modifierCount}}x {{voucherTypeName}}.",
     },
     "PokemonHeldItemModifierType": {
       extra: {
@@ -17,28 +17,28 @@ export const modifierType: ModifierTypeTranslationEntries = {
       }
     },
     "PokemonHpRestoreModifierType": {
-      description: "Restaura {{restorePoints}} PS o, al menos, un {{restorePercent}}% PS de un Pokémon",
+      description: "Restaura {{restorePoints}} PS o, al menos, un {{restorePercent}}% PS de un Pokémon.",
       extra: {
-        "fully": "Restaura todos los PS de un Pokémon",
-        "fullyWithStatus": "Restaura todos los PS de un Pokémon y cura todos los problemas de estados",
+        "fully": "Restaura todos los PS de un Pokémon.",
+        "fullyWithStatus": "Restaura todos los PS de un Pokémon y cura todos los problemas de estados.",
       }
     },
     "PokemonReviveModifierType": {
-      description: "Revive a un Pokémon y restaura {{restorePercent}}% PS",
+      description: "Revive a un Pokémon y restaura {{restorePercent}}% PS.",
     },
     "PokemonStatusHealModifierType": {
-      description: "Cura todos los problemas de estados de un Pokémon",
+      description: "Cura todos los problemas de estados de un Pokémon.",
     },
     "PokemonPpRestoreModifierType": {
-      description: "Restaura {{restorePoints}} PP del movimiento que elijas de un Pokémon",
+      description: "Restaura {{restorePoints}} PP del movimiento que elijas de un Pokémon.",
       extra: {
-        "fully": "Restaura todos los PP del movimiento que elijas de un Pokémon",
+        "fully": "Restaura todos los PP del movimiento que elijas de un Pokémon.",
       }
     },
     "PokemonAllMovePpRestoreModifierType": {
-      description: "Restaura {{restorePoints}} PP de todos los movimientos de un Pokémon",
+      description: "Restaura {{restorePoints}} PP de todos los movimientos de un Pokémon.",
       extra: {
-        "fully": "Restaura todos los PP de todos los movimientos de un Pokémon",
+        "fully": "Restaura todos los PP de todos los movimientos de un Pokémon.",
       }
     },
     "PokemonPpUpModifierType": {
