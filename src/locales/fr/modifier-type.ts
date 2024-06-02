@@ -12,8 +12,8 @@ export const modifierType: ModifierTypeTranslationEntries = {
     },
     "PokemonHeldItemModifierType": {
       extra: {
-        "inoperable": "{{pokemonName}} ne peut pas\nporter cet objet!",
-        "tooMany": "{{pokemonName}} possède trop\nd’exemplaires de cet objet!",
+        "inoperable": "{{pokemonName}} ne peut pas\nporter cet objet !",
+        "tooMany": "{{pokemonName}} possède trop\nd’exemplaires de cet objet !",
       }
     },
     "PokemonHpRestoreModifierType": {
