@@ -162,7 +162,7 @@ export const modifierType: ModifierTypeTranslationEntries = {
     "SUPER_LURE": { name: "Super Lure" },
     "MAX_LURE": { name: "Max Lure" },
 
-    "MEMORY_MUSHROOM": { name: "Memory Mushroom", description: "Recall one Pokémon's forgotten move." }, // FIX THIS IN FUTURE PR
+    "MEMORY_MUSHROOM": { name: "Memory Mushroom", description: "Recuerda uno de los movimientos olvidados de un Pokémon." },
 
     "EXP_SHARE": { name: "Repartir EXP", description: "Los que no combatan reciben el 20% de la EXP." },
     "EXP_BALANCE": { name: "EXP. Balance", description: "Da mayor parte de la EXP recibida a los miembros del equipo que tengan menos nivel." },
