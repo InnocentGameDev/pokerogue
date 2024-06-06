@@ -15,12 +15,12 @@ export const weather: SimpleTranslationEntries = {
   "sandstormStartMessage": "Une tempête de sable se prépare !",
   "sandstormLapseMessage": "La tempête de sable fait rage !",
   "sandstormClearMessage": "La tempête de sable se calme !",
-  "sandstormDamageMessage": "La tempête de sable inflige des dégâts\nà {{pokemonNameWithAffix}} !",
+  "sandstormDamageMessage": "La tempête de sable inflige des dégâts\nà {{pokemonPrefix}}{{pokemonName}} !",
 
   "hailStartMessage": "Il commence à grêler !",
   "hailLapseMessage": "La grêle continue de tomber !",
   "hailClearMessage": "La grêle s’est arrêtée !",
-  "hailDamageMessage": "La grêle inflige des dégâts\nà {{pokemonNameWithAffix}} !",
+  "hailDamageMessage": "La grêle inflige des dégâts\nà {{pokemonPrefix}}{{pokemonName}} !",
 
   "snowStartMessage": "Il commence à neiger !",
   "snowLapseMessage": "Il y a une tempête de neige !",

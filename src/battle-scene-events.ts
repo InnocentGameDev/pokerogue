@@ -1,5 +1,4 @@
 import Move from "./data/move";
-import { BerryModifier } from "./modifier/modifier";
 
 /** Alias for all {@linkcode BattleScene} events */
 export enum BattleSceneEventType {
@@ -15,17 +14,6 @@ export enum BattleSceneEventType {
    */
   MOVE_USED = "onMoveUsed",
   /**
-   * Triggers when a berry gets successfully used
-   * @see {@linkcode BerryUsedEvent}
-   */
-  BERRY_USED = "onBerryUsed",
-
-  /**
-   * Triggers at the start of each new encounter
-   * @see {@linkcode EncounterPhaseEvent}
-   */
-  ENCOUNTER_PHASE = "onEncounterPhase",
-  /**
    * Triggers on the first turn of a new battle
    * @see {@linkcode TurnInitEvent}
    */
@@ -35,7 +23,6 @@ export enum BattleSceneEventType {
    * @see {@linkcode TurnEndEvent}
    */
   TURN_END  = "onTurnEnd",
-
   /**
    * Triggers when a new {@linkcode Arena} is created during initialization
    * @see {@linkcode NewArenaEvent}
@@ -63,7 +50,7 @@ export class CandyUpgradeNotificationChangedEvent extends Event {
 */
 export class MoveUsedEvent extends Event {
   /** The ID of the {@linkcode Pokemon} that used the {@linkcode Move} */
-  public pokemonId: number;
+  public userId: number;
   /** The {@linkcode Move} used */
   public move: Move;
   /** The amount of PP used on the {@linkcode Move} this turn */
@@ -71,32 +58,9 @@ export class MoveUsedEvent extends Event {
   constructor(userId: number, move: Move, ppUsed: number) {
     super(BattleSceneEventType.MOVE_USED);
 
-    this.pokemonId = userId;
+    this.userId = userId;
     this.move = move;
     this.ppUsed = ppUsed;
-  }
-}
-/**
- * Container class for {@linkcode BattleSceneEventType.BERRY_USED} events
- * @extends Event
-*/
-export class BerryUsedEvent extends Event {
-  /** The {@linkcode BerryModifier} being used */
-  public berryModifier: BerryModifier;
-  constructor(berry: BerryModifier) {
-    super(BattleSceneEventType.BERRY_USED);
-
-    this.berryModifier = berry;
-  }
-}
-
-/**
- * Container class for {@linkcode BattleSceneEventType.ENCOUNTER_PHASE} events
- * @extends Event
-*/
-export class EncounterPhaseEvent extends Event {
-  constructor() {
-    super(BattleSceneEventType.ENCOUNTER_PHASE);
   }
 }
 /**

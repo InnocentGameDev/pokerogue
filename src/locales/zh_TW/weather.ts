@@ -15,12 +15,12 @@ export const weather: SimpleTranslationEntries = {
   "sandstormStartMessage": "開始刮沙暴了！",
   "sandstormLapseMessage": "沙暴肆虐。",
   "sandstormClearMessage": "沙暴停止了。",
-  "sandstormDamageMessage": "沙暴襲擊了{{pokemonNameWithAffix}}!",
+  "sandstormDamageMessage": "沙暴襲擊了{{pokemonPrefix}}{{pokemonName}}!",
 
   "hailStartMessage": "開始下冰雹了!",
   "hailLapseMessage": "冰雹繼續肆虐。",
   "hailClearMessage": "冰雹不再下了。",
-  "hailDamageMessage": "冰雹襲擊了{{pokemonNameWithAffix}}!",
+  "hailDamageMessage": "冰雹襲擊了{{pokemonPrefix}}{{pokemonName}}!",
 
   "snowStartMessage": "開始下雪了!",
   "snowLapseMessage": "雪繼續下。",

@@ -1,3 +1,4 @@
+import * as Utils from "../utils";
 import { addTextObject, TextStyle } from "./text";
 import BattleScene from "#app/battle-scene.js";
 import { ArenaTagSide } from "#app/data/arena-tag.js";
@@ -7,8 +8,7 @@ import { addWindow, WindowVariant } from "./ui-theme";
 import { ArenaEvent, ArenaEventType, TagAddedEvent, TagRemovedEvent, TerrainChangedEvent, WeatherChangedEvent } from "#app/field/arena-events.js";
 import { BattleSceneEventType, TurnEndEvent } from "#app/battle-scene-events.js";
 import { ArenaTagType } from "#app/data/enums/arena-tag-type.js";
-import TimeOfDayWidget from "./time-of-day-widget";
-import * as Utils from "../utils";
+import { TimeOfDay } from "#app/data/enums/time-of-day.js";
 
 /** Enum used to differentiate {@linkcode Arena} effects */
 enum ArenaEffectType {
@@ -60,7 +60,8 @@ export default class ArenaFlyout extends Phaser.GameObjects.Container {
   /** The {@linkcode Phaser.GameObjects.Text} that goes inside of the header */
   private flyoutTextHeader: Phaser.GameObjects.Text;
 
-  private timeOfDayWidget: TimeOfDayWidget;
+  /** The {@linkcode Phaser.GameObjects.Sprite} that represents the current time of day */
+  private timeOfDayIcon: Phaser.GameObjects.Sprite;
 
   /** The {@linkcode Phaser.GameObjects.Text} header used to indicate the player's effects */
   private flyoutTextHeaderPlayer: Phaser.GameObjects.Text;
@@ -80,10 +81,11 @@ export default class ArenaFlyout extends Phaser.GameObjects.Container {
   private readonly fieldEffectInfo: ArenaEffectInfo[] = [];
 
   // Stores callbacks in a variable so they can be unsubscribed from when destroyed
-  private readonly onNewArenaEvent =  (event: Event) => this.onNewArena(event);
-  private readonly onTurnEndEvent =   (event: Event) => this.onTurnEnd(event);
+  private onNewArenaEvent =  (event: Event) => this.onNewArena(event);
+  private onTurnInitEvent =  (event: Event) => this.onTurnInit(event);
+  private onTurnEndEvent =   (event: Event) => this.onTurnEnd(event);
 
-  private readonly onFieldEffectChangedEvent = (event: Event) => this.onFieldEffectChanged(event);
+  private onFieldEffectChangedEvent = (event: Event) => this.onFieldEffectChanged(event);
 
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0);
@@ -115,8 +117,10 @@ export default class ArenaFlyout extends Phaser.GameObjects.Container {
 
     this.flyoutContainer.add(this.flyoutTextHeader);
 
-    this.timeOfDayWidget = new TimeOfDayWidget(this.scene, (this.flyoutWidth / 2) + (this.flyoutWindowHeader.displayWidth / 2));
-    this.flyoutContainer.add(this.timeOfDayWidget);
+    this.timeOfDayIcon = this.scene.add.sprite((this.flyoutWidth / 2) + (this.flyoutWindowHeader.displayWidth / 2), 0, "dawn_icon").setOrigin();
+    this.timeOfDayIcon.setVisible(false);
+
+    this.flyoutContainer.add(this.timeOfDayIcon);
 
     this.flyoutTextHeaderPlayer = addTextObject(this.scene, 6, 5, "Player", TextStyle.SUMMARY_BLUE);
     this.flyoutTextHeaderPlayer.setFontSize(54);
@@ -168,7 +172,16 @@ export default class ArenaFlyout extends Phaser.GameObjects.Container {
 
     // Subscribes to required events available on game start
     this.battleScene.eventTarget.addEventListener(BattleSceneEventType.NEW_ARENA, this.onNewArenaEvent);
+    this.battleScene.eventTarget.addEventListener(BattleSceneEventType.TURN_INIT, this.onTurnInitEvent);
     this.battleScene.eventTarget.addEventListener(BattleSceneEventType.TURN_END,  this.onTurnEndEvent);
+  }
+
+  private setTimeOfDayIcon() {
+    this.timeOfDayIcon.setTexture(TimeOfDay[this.battleScene.arena.getTimeOfDay()].toLowerCase() + "_icon");
+  }
+
+  private onTurnInit(event: Event) {
+    this.setTimeOfDayIcon();
   }
 
   private onNewArena(event: Event) {
@@ -179,6 +192,8 @@ export default class ArenaFlyout extends Phaser.GameObjects.Container {
     this.battleScene.arena.eventTarget.addEventListener(ArenaEventType.TERRAIN_CHANGED, this.onFieldEffectChangedEvent);
     this.battleScene.arena.eventTarget.addEventListener(ArenaEventType.TAG_ADDED,       this.onFieldEffectChangedEvent);
     this.battleScene.arena.eventTarget.addEventListener(ArenaEventType.TAG_REMOVED,     this.onFieldEffectChangedEvent);
+
+    this.setTimeOfDayIcon();
   }
 
   /**
@@ -345,18 +360,17 @@ export default class ArenaFlyout extends Phaser.GameObjects.Container {
    * Animates the flyout to either show or hide it by applying a fade and translation
    * @param visible Should the flyout be shown?
    */
-  public toggleFlyout(visible: boolean): void {
+  toggleFlyout(visible: boolean): void {
     this.scene.tweens.add({
       targets: this.flyoutParent,
       x: visible ? this.anchorX : this.anchorX - this.translationX,
       duration: Utils.fixedInt(125),
       ease: "Sine.easeInOut",
       alpha: visible ? 1 : 0,
-      onComplete: () => this.timeOfDayWidget.parentVisible = visible,
     });
   }
 
-  public destroy(fromScene?: boolean): void {
+  destroy(fromScene?: boolean): void {
     this.battleScene.eventTarget.removeEventListener(BattleSceneEventType.NEW_ARENA, this.onNewArenaEvent);
     this.battleScene.eventTarget.removeEventListener(BattleSceneEventType.TURN_END,  this.onTurnEndEvent);
 
@@ -365,6 +379,6 @@ export default class ArenaFlyout extends Phaser.GameObjects.Container {
     this.battleScene.arena.eventTarget.removeEventListener(ArenaEventType.TAG_ADDED,       this.onFieldEffectChangedEvent);
     this.battleScene.arena.eventTarget.removeEventListener(ArenaEventType.TAG_REMOVED,     this.onFieldEffectChangedEvent);
 
-    super.destroy(fromScene);
+    super.destroy();
   }
 }

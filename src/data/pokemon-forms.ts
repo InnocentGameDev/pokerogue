@@ -730,10 +730,6 @@ export const pokemonFormChanges: PokemonFormChanges = {
   [Species.GALAR_DARMANITAN]: [
     new SpeciesFormChange(Species.GALAR_DARMANITAN, "", "zen", new SpeciesFormChangeManualTrigger(), true),
     new SpeciesFormChange(Species.GALAR_DARMANITAN, "zen", "", new SpeciesFormChangeManualTrigger(), true)
-  ],
-  [Species.EISCUE]: [
-    new SpeciesFormChange(Species.EISCUE, "", "no-ice", new SpeciesFormChangeManualTrigger(), true),
-    new SpeciesFormChange(Species.EISCUE, "no-ice", "", new SpeciesFormChangeManualTrigger(), true),
   ]
 };
 

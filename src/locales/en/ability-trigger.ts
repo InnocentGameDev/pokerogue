@@ -5,6 +5,5 @@ export const abilityTriggers: SimpleTranslationEntries = {
   "badDreams": "{{pokemonName}} is tormented!",
   "windPowerCharged": "Being hit by {{moveName}} charged {{pokemonName}} with power!",
   "perishBody": "{{pokemonName}}'s {{abilityName}}\nwill faint both pokemon in 3 turns!",
-  "poisonHeal": "{{pokemonName}}'s {{abilityName}}\nrestored its HP a little!",
-  "iceFaceAvoidedDamage": "{{pokemonName}} avoided\ndamage with {{abilityName}}!"
+  "poisonHeal": "{{pokemonName}}'s {{abilityName}}\nrestored its HP a little!"
 } as const;

@@ -7,7 +7,20 @@ import { getStatusEffectHealText } from "./status-effect";
 import * as Utils from "../utils";
 import { DoubleBerryEffectAbAttr, ReduceBerryUseThresholdAbAttr, applyAbAttrs } from "./ability";
 import i18next from "../plugins/i18n";
-import { BerryType } from "./enums/berry-type";
+
+export enum BerryType {
+  SITRUS,
+  LUM,
+  ENIGMA,
+  LIECHI,
+  GANLON,
+  PETAYA,
+  APICOT,
+  SALAC,
+  LANSAT,
+  STARF,
+  LEPPA
+}
 
 export function getBerryName(berryType: BerryType): string {
   return i18next.t(`berry:${BerryType[berryType]}.name`);
@@ -81,9 +94,12 @@ export function getBerryEffectFunc(berryType: BerryType): BerryEffectFunc {
       }
       if (pokemon.status) {
         pokemon.scene.queueMessage(getPokemonMessage(pokemon, getStatusEffectHealText(pokemon.status.effect)));
+        pokemon.resetStatus();
+        pokemon.updateInfo();
       }
-      pokemon.resetStatus(true, true);
-      pokemon.updateInfo();
+      if (pokemon.getTag(BattlerTagType.CONFUSED)) {
+        pokemon.lapseTag(BattlerTagType.CONFUSED);
+      }
     };
   case BerryType.LIECHI:
   case BerryType.GANLON:

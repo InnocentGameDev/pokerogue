@@ -48,7 +48,7 @@ export interface InterfaceConfig {
     custom?: MappingLayout;
 }
 
-const repeatInputDelayMillis = 500;
+const repeatInputDelayMillis = 250;
 
 // Phaser.Input.Gamepad.GamepadPlugin#refreshPads
 declare module "phaser" {
@@ -88,6 +88,7 @@ declare module "phaser" {
  * providing a unified interface for all input-related interactions.
  */
 export class InputsController {
+  private buttonKeys: Phaser.Input.Keyboard.Key[][];
   private gamepads: Array<Phaser.Input.Gamepad.Gamepad> = new Array();
   private scene: BattleScene;
   public events: Phaser.Events.EventEmitter;
@@ -122,6 +123,7 @@ export class InputsController {
   constructor(scene: BattleScene) {
     this.scene = scene;
     this.time = this.scene.time;
+    this.buttonKeys = [];
     this.selectedDevice = {
       [Device.GAMEPAD]: null,
       [Device.KEYBOARD]: "default"
