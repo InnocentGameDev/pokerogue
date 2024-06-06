@@ -46,7 +46,7 @@ export const modifierType: ModifierTypeTranslationEntries = {
     },
     "PokemonNatureChangeModifierType": {
       name: "Hortelã {{natureName}}",
-      description: "Muda a natureza de um Pokémon para {{natureName}} e a desbloqueia permanentemente para seu inicial.",
+      description: "Muda a natureza do Pokémon para {{natureName}} e a desbloqueia permanentemente.",
     },
     "DoubleBattleChanceBoosterModifierType": {
       description: "Dobra as chances de encontrar uma batalha em dupla por {{battleCount}} batalhas.",
@@ -98,6 +98,10 @@ export const modifierType: ModifierTypeTranslationEntries = {
     "TmModifierType": {
       name: "TM{{moveId}} - {{moveName}}",
       description: "Ensina {{moveName}} a um Pokémon.",
+    },
+    "TmModifierTypeWithInfo": {
+      name: "TM{{moveId}} - {{moveName}}",
+      description: "Ensina {{moveName}} a um Pokémon\n(Segure C ou Shift para mais informações).",
     },
     "EvolutionItemModifierType": {
       description: "Faz certos Pokémon evoluírem.",
@@ -209,7 +213,6 @@ export const modifierType: ModifierTypeTranslationEntries = {
     "LEFTOVERS": { name: "Sobras", description: "Cura 1/16 dos PS máximos de um Pokémon a cada turno." },
     "SHELL_BELL": { name: "Concha-Sino", description: "Cura 1/8 do dano causado por um Pokémon." },
 
-
     "TOXIC_ORB": { name: "Esfera Tóxica", description: "Uma esfera estranha que exala toxinas quando tocada e envenena seriamente quem a segurar." },
     "FLAME_ORB": { name: "Esfera da Chama", description: "Uma esfera estranha que aquece quando tocada e queima quem a segurar." },
 
@@ -231,10 +234,8 @@ export const modifierType: ModifierTypeTranslationEntries = {
     "ENEMY_HEAL": { name: "Token de Recuperação", description: "Cura 2% dos PS máximos a cada turno." },
     "ENEMY_ATTACK_POISON_CHANCE": { name: "Token de Veneno" },
     "ENEMY_ATTACK_PARALYZE_CHANCE": { name: "Token de Paralisia" },
-    "ENEMY_ATTACK_SLEEP_CHANCE": { name: "Token de Sono" },
-    "ENEMY_ATTACK_FREEZE_CHANCE": { name: "Token de Congelamento" },
     "ENEMY_ATTACK_BURN_CHANCE": { name: "Token de Queimadura" },
-    "ENEMY_STATUS_EFFECT_HEAL_CHANCE": { name: "Token de Cura Total", description: "Adiciona uma chance de 10% a cada turno de curar uma condição de status." },
+    "ENEMY_STATUS_EFFECT_HEAL_CHANCE": { name: "Token de Cura Total", description: "Adiciona uma chance de 2.5% a cada turno de curar uma condição de status." },
     "ENEMY_ENDURE_CHANCE": { name: "Token de Persistência" },
     "ENEMY_FUSED_CHANCE": { name: "Token de Fusão", description: "Adiciona uma chance de 1% de que um Pokémon selvagem seja uma fusão." },
   },
