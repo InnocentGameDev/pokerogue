@@ -26,9 +26,14 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
     // Normal difficulty trainer is randomly pulled from biome
     const normalTrainerType = scene.arena.randomTrainerType(scene.currentBattle.waveIndex);
     const normalConfig = trainerConfigs[normalTrainerType].copy();
-    const normalSpriteKey = normalConfig.getSpriteKey(normalConfig.hasGenders ? !!Utils.randSeedInt(2) : false, normalConfig.doubleOnly);
+    let female = false;
+    if (normalConfig.hasGenders) {
+      female = !!(Utils.randSeedInt(2));
+    }
+    const normalSpriteKey = normalConfig.getSpriteKey(female, normalConfig.doubleOnly);
     instance.enemyPartyConfigs.push({
-      trainerConfig: normalConfig
+      trainerConfig: normalConfig,
+      female: female
     });
 
     // Hard difficulty trainer is another random trainer, but with AVERAGE_BALANCED config
@@ -39,9 +44,15 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
       new TrainerPartyTemplate(Math.min(Math.ceil(scene.currentBattle.waveIndex / 20), 5), PartyMemberStrength.AVERAGE, false, true));
     const hardConfig = trainerConfigs[hardTrainerType].copy();
     hardConfig.setPartyTemplates(hardTemplate);
-    const hardSpriteKey = hardConfig.getSpriteKey(normalConfig.hasGenders ? !!Utils.randSeedInt(2) : false, normalConfig.doubleOnly);
+    female = false;
+    if (hardConfig.hasGenders) {
+      female = !!(Utils.randSeedInt(2));
+    }
+    const hardSpriteKey = hardConfig.getSpriteKey(female, hardConfig.doubleOnly);
     instance.enemyPartyConfigs.push({
-      trainerConfig: hardConfig
+      trainerConfig: hardConfig,
+      levelAdditiveMultiplier: 1,
+      female: female,
     });
 
     // Brutal trainer is pulled from pool of boss trainers (gym leaders) for the biome
@@ -51,10 +62,15 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
     const brutalConfig = trainerConfigs[brutalTrainerType].copy();
     brutalConfig.setPartyTemplates(e4Template);
     brutalConfig.partyTemplateFunc = null; // Overrides gym leader party template func
-    const brutalSpriteKey = brutalConfig.getSpriteKey(normalConfig.hasGenders ? !!Utils.randSeedInt(2) : false, normalConfig.doubleOnly);
+    female = false;
+    if (brutalConfig.hasGenders) {
+      female = !!(Utils.randSeedInt(2));
+    }
+    const brutalSpriteKey = brutalConfig.getSpriteKey(female, brutalConfig.doubleOnly);
     instance.enemyPartyConfigs.push({
-      levelAdditiveMultiplier: 1.1,
-      trainerConfig: brutalConfig
+      trainerConfig: brutalConfig,
+      levelAdditiveMultiplier: 1,
+      female: female
     });
 
     instance.spriteConfigs = [

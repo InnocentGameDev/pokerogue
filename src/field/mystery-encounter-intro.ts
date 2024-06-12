@@ -27,8 +27,6 @@ export default class MysteryEncounterIntroVisuals extends Phaser.GameObjects.Con
     super(scene, -72, 76);
     this.encounter = encounter;
     this.spriteConfigs = encounter.spriteConfigs;
-    // this.animSpriteConfigs = encounter.spriteConfigs.filter(c => !c.isItem);
-    // this.iconConfigs = encounter.spriteConfigs.filter(c => c.isItem);
     if (!this.spriteConfigs) {
       return;
     }
