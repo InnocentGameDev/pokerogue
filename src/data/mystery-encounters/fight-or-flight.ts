@@ -25,6 +25,7 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
   .withEncounterType(MysteryEncounterType.FIGHT_OR_FLIGHT)
   .withIntroSpriteConfigs([]) // Set in onInit()
   .withRequirement(new WaveCountRequirement([2, 180])) // waves 2 to 180
+  .withCatchAllowed(true)
   .withOnInit((scene: BattleScene) => {
     const instance = scene.currentBattle.mysteryEncounter;
 

@@ -18,9 +18,13 @@ import {
   regenerateModifierPoolThresholds
 } from "../modifier/modifier-type";
 import {BattleEndPhase, EggLapsePhase, ModifierRewardPhase, TrainerVictoryPhase} from "../phases";
-import {MysteryEncounterBattlePhase, PostMysteryEncounterPhase} from "../phases/mystery-encounter-phase";
+import {
+  MysteryEncounterBattlePhase,
+  MysteryEncounterRewardsPhase
+} from "../phases/mystery-encounter-phase";
 import * as Utils from "../utils";
 import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
+import {isNullOrUndefined} from "../utils";
 
 /**
  * Util file for functions used in mystery encounters
@@ -51,6 +55,7 @@ export function hideMysteryEncounterIntroVisuals(scene: BattleScene): Promise<bo
           scene.field.remove(introVisuals);
           introVisuals.setVisible(false);
           introVisuals.destroy();
+          scene.currentBattle.mysteryEncounter.introVisuals = null;
           resolve(true);
         }
       });
@@ -228,6 +233,7 @@ export class EnemyPartyConfig {
   trainerConfig?: TrainerConfig; // More customizable option for configuring trainer battle
   pokemonSpecies?: PokemonSpecies[];
   pokemonBosses?: PokemonSpecies[];
+  female?: boolean; // True for female trainer, false for male
 }
 
 /**
@@ -249,7 +255,7 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
   // Trainer
   const trainerType = partyConfig?.trainerType;
   const trainerConfig = partyConfig?.trainerConfig;
-  if (trainerType || partyConfig?.trainerConfig) {
+  if (trainerType || trainerConfig) {
     scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.TRAINER_BATTLE;
     if (scene.currentBattle.trainer) {
       scene.currentBattle.trainer.setVisible(false);
@@ -258,8 +264,9 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
 
     const trainerConfig = partyConfig?.trainerConfig ? partyConfig?.trainerConfig : trainerConfigs[trainerType];
 
-    const doubleTrainer = trainerConfig.doubleOnly || (trainerConfig.hasDouble && partyConfig?.doubleBattle);
-    const newTrainer = new Trainer(scene, trainerConfig.trainerType, doubleTrainer ? TrainerVariant.DOUBLE : Utils.randSeedInt(2) ? TrainerVariant.FEMALE : TrainerVariant.DEFAULT, null, null, null, trainerConfig);
+    const doubleTrainer = trainerConfig.doubleOnly || (trainerConfig.hasDouble && partyConfig.doubleBattle);
+    const trainerFemale = isNullOrUndefined(partyConfig.female) ? !!(Utils.randSeedInt(2)) : partyConfig.female;
+    const newTrainer = new Trainer(scene, trainerConfig.trainerType, doubleTrainer ? TrainerVariant.DOUBLE : trainerFemale ? TrainerVariant.FEMALE : TrainerVariant.DEFAULT, null, null, null, trainerConfig);
     newTrainer.x += 300;
     newTrainer.setVisible(false);
     scene.field.add(newTrainer);
@@ -277,7 +284,13 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
   battle.enemyParty = [];
 
   // Adjust levels for battle by modifier
-  battle.enemyLevels = battle.enemyLevels.map(level => Math.round(level + scene.currentBattle.waveIndex / 10 * partyConfig.levelAdditiveMultiplier));
+  // ME levels are modified by an additive that scales with wave index
+  // Every 10 floors, 1 will be added to level value, which starts at 2
+  // This can be amplified or counteracted by setting levelAdditiveMultiplier in config
+  // Leaving undefined will default to 0
+  const mult = !isNullOrUndefined(partyConfig.levelAdditiveMultiplier) ? partyConfig.levelAdditiveMultiplier : 0;
+  const additive = Math.max(Math.round((2 + scene.currentBattle.waveIndex / 10) * mult), 0);
+  battle.enemyLevels = battle.enemyLevels.map(level => level + additive);
 
   battle.enemyLevels.forEach((level, e) => {
     let enemySpecies;
@@ -471,10 +484,7 @@ export function leaveEncounterWithoutBattle(scene: BattleScene) {
 export function handleMysteryEncounterVictory(scene: BattleScene) {
   if (scene.currentBattle.mysteryEncounter.encounterVariant === MysteryEncounterVariant.NO_BATTLE) {
     scene.pushPhase(new EggLapsePhase(scene));
-    if (scene.currentBattle.mysteryEncounter.doEncounterRewards) {
-      scene.currentBattle.mysteryEncounter.doEncounterRewards(scene);
-    }
-    scene.pushPhase(new PostMysteryEncounterPhase(scene));
+    scene.pushPhase(new MysteryEncounterRewardsPhase(scene));
   } else if (!scene.getEnemyParty().find(p => scene.currentBattle.mysteryEncounter.encounterVariant !== MysteryEncounterVariant.TRAINER_BATTLE ? p.isOnField() : !p?.isFainted(true))) {
     scene.pushPhase(new BattleEndPhase(scene));
     if (scene.currentBattle.mysteryEncounter.encounterVariant === MysteryEncounterVariant.TRAINER_BATTLE) {
@@ -482,11 +492,7 @@ export function handleMysteryEncounterVictory(scene: BattleScene) {
     }
     if (scene.gameMode.isEndless || !scene.gameMode.isWaveFinal(scene.currentBattle.waveIndex)) {
       scene.pushPhase(new EggLapsePhase(scene));
-      if (scene.currentBattle.mysteryEncounter.doEncounterRewards) {
-        scene.currentBattle.mysteryEncounter.doEncounterRewards(scene);
-      }
-
-      scene.pushPhase(new PostMysteryEncounterPhase(scene));
+      scene.pushPhase(new MysteryEncounterRewardsPhase(scene));
     }
   }
 }

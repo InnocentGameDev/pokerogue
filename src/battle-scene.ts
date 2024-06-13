@@ -1081,9 +1081,12 @@ export default class BattleScene extends SceneBase {
 
       // If Encounter has an onInit() function, call it
       // Usually used for calculating rand data before initializing anything visual
-      if (newEncounter.onInit) {
-        newEncounter.onInit(this);
-      }
+      this.executeWithSeedOffset(() => {
+        if (newEncounter.onInit) {
+          newEncounter.onInit(this);
+        }
+      }, this.currentBattle.waveIndex);
+
 
       // Add intro visuals for mystery encounter
       newEncounter.initIntroVisuals(this);
