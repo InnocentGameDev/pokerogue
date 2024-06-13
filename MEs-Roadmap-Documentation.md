@@ -8,11 +8,11 @@
     
     - 🐛 Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app
     - 🐛 Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
-    - ⚙️ "Steal from player" functionality (Gholdengo ME) ❌
-    - ⚙️ "Omniboost" functionality (Fight or Flight ME)
-    - ⚙️ Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs ❌
-      - ⚙️ Hardcode that the same ME can't happen twice in a row -- boring and sometimes too rough
-    - ⚙️ Push Dark Deal ME to a higher wave requirement (+30) as it seems to be functioning (mostly) bugless.
+    - ⚙️ "Steal from player" functionality (Gholdengo ME) 🛠️
+    - ⚙️ "Omniboost" functionality (Fight or Flight ME) 🛠️
+    - ⚙️ Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs 🛠️
+      - ⚙️ Hardcode that the same ME can't happen twice in a row -- boring and sometimes too rough 🛠️
+    - ⚙️ Push Dark Deal ME to a higher wave requirement (+30) as it seems to be functioning (mostly) bugless. 🛠️
 
 - ### Low priority
     - 🐛 Mysterious Challengers can spawn two trainers of the same type
