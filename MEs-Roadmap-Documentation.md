@@ -1,29 +1,32 @@
 # 📝 Most immediate things on the to-do platter
 
 - ### High priority
-    - 🐛 Opening the chest simply moves you to a wild battle against nothingness, which you can escape after you get bored of it.
     - 🐛 Picking up certain items in Fight or Flight is still broken. Workaround is leave encounter.
-    - 🐛 Modifiers that are applied to pokemon get skipped in Fight or Flight. 
+    - 🐛 Modifiers that are applied to pokemon get skipped in Fight or Flight.
 
 - ### Medium priority
-    - 🐛 PKMN Sprites and their HP/lvl bar doesn't get properly recalled when finding an ME or when meeting Rival. 🛠️
+    
     - 🐛 Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app
-    - 🐛 If a ME spawns on the first floor of a new biome (NewBiomeEncounterPhase), intro visuals do not spawn properly
+    - 🐛 Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
     - ⚙️ "Steal from player" functionality (Gholdengo ME) ❌
+    - ⚙️ "Omniboost" functionality (Fight or Flight ME)
     - ⚙️ Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs ❌
+      - ⚙️ Hardcode that the same ME can't happen twice in a row -- boring and sometimes too rough
     - ⚙️ Push Dark Deal ME to a higher wave requirement (+30) as it seems to be functioning (mostly) bugless.
 
 - ### Low priority
     - 🐛 Mysterious Challengers can spawn two trainers of the same type
+    - ⚖️ Lower waves "Fight of Flight" mons are sometimes too easy -- lvl 3 Wurmple at floor 4. Lvl 8 Combee at floor 11.
+        - Sometimes they can be pretty ridiculous (lvl 18 boss early into biome 2)
 
 
-# 📝 Things to be done before Mystery Encounters ("~~~~MEs") MVP is finished:
+# 📝 Things to be done before Mystery Encounters ("MEs/Events") MVP is finished:
   All the things on this list should be done before the merge as a MVP (Minimum Viable Product) release.
 
 - ## Bugless implementation of the MVP MEs
   - Establish placeholder waves for MEs to happen ✔️
-  - Bug-ish implementation of Common ME 1 🛠️
-  - Bug-ish implementation of Common ME 2 🛠️
+  - Bug-ish implementation of Common ME 1 ✔️
+  - Bug-ish implementation of Common ME 2 ✔️
   - Bug-ish implementation of Rare ME 1 ✔️
   - Bug-ish implementation of Epic ME 1 🛠️
   - Bug-ish implementation of Legendary ME 1 ✔️
@@ -108,15 +111,17 @@ Mysterious Encounters aim to be an addition to PokeRogue that will fundamentally
 
 # 📝 Known bugs (squash 'em all!):
   - ## 🔴 __**Really bad ones**__
-    - 🐛 Opening the chest simply moves you to a wild battle against nothingness, which you can escape after you get bored of it.
-    - 🐛 Weaker trainers from Mysterious Challenger crashes the game when the reward screen should come out
+    - 🐛 Picking up certain items in Fight or Flight is still broken. Workaround is leave encounter.
+    - 🐛 Modifiers that are applied to pokemon get skipped in Fight or Flight.
 
   - ## 🟡 __**Bad ones under certain circumstances**__
     - 🐛 Needs further replication : At wave 51, wild PKMN encounter caused a freezed after pressing "ESC" key upon being asked to switch PKMNs
+    - 🐛 Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app
+    - 🐛 Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
 
   - ## 🟢 __**Non-game breaking**__
     - 🐛 Scientist will remember the first PKMN it "did the thing on" and never ever forget it, even in future runs. Only affects dialogue.
-    - 🐛 Any ME that procs and wave (?)(?)(1) has its sprite removed. Only the sprite is affected.
+    - 
 
 
 # 🗿 Other cool things/functionalities that won't make it in the MVP but are planned to accomodate future MEs:
@@ -144,3 +149,16 @@ Mysterious Encounters aim to be an addition to PokeRogue that will fundamentally
 - Add logic for choosing a Pokémon from party for some effect (trades, sacrifices, etc) 
 - Add logic for awarding exp to the party (outside of a normal combat)
 - Encounter/pull a PKMN from a pre-defined pool (ie. "Ultrabeasts")
+
+
+# Log Documentation
+
+## 12th-13th June
+- The 🐛 "Opening the chest simply moves you to a wild battle against nothingness, which you can escape after you get bored of it." is fixed.
+- The 🐛 "PKMN Sprites and their HP/lvl bar doesn't get properly recalled when finding an ME or when meeting Rival." is fixed. 
+- The 🐛 "Weaker trainers from Mysterious Challenger crashes the game when the reward screen should come out" is fixed.
+- The 🐛 "If a ME spawns on the first floor of a new biome (NewBiomeEncounterPhase), intro visuals do not spawn properly" is fixed.
+- The 🐛 "Any ME that procs at wave (?)(?)(1) has its sprite removed. Only the sprite is affected." is fixed.
+- The 🐛 "Picking a double battle trainer (ie Twins) as your challenge results in a game over, including loss of save." should be fixed.
+- Allowed catch in "Fight or Flight" -- it was counterintuitive to not allow it as it __is__ a wild PKMN fight.
+- More minor 🐛 squashed.
