@@ -18,7 +18,10 @@ import {
   regenerateModifierPoolThresholds
 } from "../modifier/modifier-type";
 import {BattleEndPhase, EggLapsePhase, ModifierRewardPhase, TrainerVictoryPhase} from "../phases";
-import {MysteryEncounterBattlePhase, PostMysteryEncounterPhase} from "../phases/mystery-encounter-phase";
+import {
+  MysteryEncounterBattlePhase,
+  MysteryEncounterRewardsPhase
+} from "../phases/mystery-encounter-phase";
 import * as Utils from "../utils";
 import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
 import {isNullOrUndefined} from "../utils";
@@ -481,10 +484,7 @@ export function leaveEncounterWithoutBattle(scene: BattleScene) {
 export function handleMysteryEncounterVictory(scene: BattleScene) {
   if (scene.currentBattle.mysteryEncounter.encounterVariant === MysteryEncounterVariant.NO_BATTLE) {
     scene.pushPhase(new EggLapsePhase(scene));
-    if (scene.currentBattle.mysteryEncounter.doEncounterRewards) {
-      scene.currentBattle.mysteryEncounter.doEncounterRewards(scene);
-    }
-    scene.pushPhase(new PostMysteryEncounterPhase(scene));
+    scene.pushPhase(new MysteryEncounterRewardsPhase(scene));
   } else if (!scene.getEnemyParty().find(p => scene.currentBattle.mysteryEncounter.encounterVariant !== MysteryEncounterVariant.TRAINER_BATTLE ? p.isOnField() : !p?.isFainted(true))) {
     scene.pushPhase(new BattleEndPhase(scene));
     if (scene.currentBattle.mysteryEncounter.encounterVariant === MysteryEncounterVariant.TRAINER_BATTLE) {
@@ -492,11 +492,7 @@ export function handleMysteryEncounterVictory(scene: BattleScene) {
     }
     if (scene.gameMode.isEndless || !scene.gameMode.isWaveFinal(scene.currentBattle.waveIndex)) {
       scene.pushPhase(new EggLapsePhase(scene));
-      if (scene.currentBattle.mysteryEncounter.doEncounterRewards) {
-        scene.currentBattle.mysteryEncounter.doEncounterRewards(scene);
-      }
-
-      scene.pushPhase(new PostMysteryEncounterPhase(scene));
+      scene.pushPhase(new MysteryEncounterRewardsPhase(scene));
     }
   }
 }

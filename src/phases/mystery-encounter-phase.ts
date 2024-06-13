@@ -38,9 +38,12 @@ export class MysteryEncounterPhase extends Phase {
     // Set option selected flag
     this.scene.currentBattle.mysteryEncounter.selectedOption = option;
 
-    if (option.onPreOptionPhase) {
-      option.onPreOptionPhase(this.scene);
-    }
+    this.scene.executeWithSeedOffset(() => {
+      if (option.onPreOptionPhase) {
+        option.onPreOptionPhase(this.scene);
+      }
+    }, this.scene.currentBattle.waveIndex);
+
 
     if (!option.onOptionPhase) {
       return false;
@@ -122,9 +125,11 @@ export class MysteryEncounterOptionSelectedPhase extends Phase {
     super.start();
     //this.scene.pushPhase(new PostMysteryEncounterPhase(this.scene));
     hideMysteryEncounterIntroVisuals(this.scene).then(() => {
-      this.onOptionSelect(this.scene).finally(() => {
-        this.end();
-      });
+      this.scene.executeWithSeedOffset(() => {
+        this.onOptionSelect(this.scene).finally(() => {
+          this.end();
+        });
+      }, this.scene.currentBattle.waveIndex);
     });
   }
 }
@@ -311,6 +316,33 @@ export class MysteryEncounterBattlePhase extends Phase {
  * - Resetting encounter-specific flags (not session flags)
  * - Queuing of the next wave
  */
+export class MysteryEncounterRewardsPhase extends Phase {
+
+  constructor(scene: BattleScene) {
+    super(scene);
+  }
+
+  start() {
+    super.start();
+
+    this.scene.executeWithSeedOffset(() => {
+      if (this.scene.currentBattle.mysteryEncounter.doEncounterRewards) {
+        this.scene.currentBattle.mysteryEncounter.doEncounterRewards(this.scene);
+      }
+    }, this.scene.currentBattle.waveIndex);
+
+    this.scene.pushPhase(new PostMysteryEncounterPhase(this.scene));
+    this.end();
+  }
+}
+
+/**
+ * Will handle (in order):
+ * - onPostOptionSelect logic (based on an option that was selected)
+ * - Showing any outro dialogue messages
+ * - Resetting encounter-specific flags (not session flags)
+ * - Queuing of the next wave
+ */
 export class PostMysteryEncounterPhase extends Phase {
   onPostOptionSelect: (scene: BattleScene) => boolean | void;
 
@@ -322,9 +354,11 @@ export class PostMysteryEncounterPhase extends Phase {
   start() {
     super.start();
 
-    if (this.onPostOptionSelect) {
-      this.onPostOptionSelect(this.scene);
-    }
+    this.scene.executeWithSeedOffset(() => {
+      if (this.onPostOptionSelect) {
+        this.onPostOptionSelect(this.scene);
+      }
+    }, this.scene.currentBattle.waveIndex);
 
     const endPhase = () => {
       this.scene.pushPhase(new NewBattlePhase(this.scene));
@@ -368,8 +402,4 @@ export class PostMysteryEncounterPhase extends Phase {
       endPhase();
     }
   }
-
-  //end() {
-  //  this.scene.ui.setMode(Mode.MESSAGE).then(() => super.end());
-  //}
 }
