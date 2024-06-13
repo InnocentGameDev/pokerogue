@@ -13,7 +13,7 @@ import { CommonAnim, CommonBattleAnim, MoveAnim, initMoveAnim, loadMoveAnimAsset
 import { StatusEffect, getStatusEffectActivationText, getStatusEffectCatchRateMultiplier, getStatusEffectHealText, getStatusEffectObtainText, getStatusEffectOverlapText } from "./data/status-effect";
 import { SummaryUiMode } from "./ui/summary-ui-handler";
 import EvolutionSceneHandler from "./ui/evolution-scene-handler";
-import { EvolutionPhase } from "./phases/evolution-phase";
+import { EvolutionPhase } from "./evolution-phase";
 import { Phase } from "./phase";
 import { BattleStat, getBattleStatLevelChangeDescription, getBattleStatName } from "./data/battle-stat";
 import { biomeLinks, getBiomeName } from "./data/biomes";
@@ -27,15 +27,7 @@ import {
   getEnemyBuffModifierForWave,
   getModifierType,
   modifierTypes,
-  regenerateModifierPoolThresholds,
-  ModifierTypeGenerator,
-  PokemonModifierType,
-  FusePokemonModifierType,
-  PokemonMoveModifierType,
-  TmModifierType,
-  RememberMoveModifierType,
-  PokemonPpRestoreModifierType,
-  PokemonPpUpModifierType
+  regenerateModifierPoolThresholds
 } from "./modifier/modifier-type";
 import SoundFade from "phaser3-rex-plugins/plugins/soundfade";
 import { BattlerTagLapseType, EncoreTag, HideSpriteTag as HiddenTag, ProtectedTag, TrappedTag } from "./data/battler-tags";
@@ -56,7 +48,7 @@ import { Species } from "./data/enums/species";
 import { ChallengeAchv, HealAchv, LevelAchv, achvs } from "./system/achv";
 import { TrainerSlot, trainerConfigs } from "./data/trainer-config";
 import { TrainerType } from "./data/enums/trainer-type";
-import { EggHatchPhase } from "./phases/egg-hatch-phase";
+import { EggHatchPhase } from "./egg-hatch-phase";
 import { Egg } from "./data/egg";
 import { vouchers } from "./system/voucher";
 import { loggedInUser, updateUserInfo } from "./account";
@@ -78,7 +70,7 @@ import { Abilities } from "./data/enums/abilities";
 import * as Overrides from "./overrides";
 import { TextStyle, addTextObject } from "./ui/text";
 import { Type } from "./data/type";
-import { BerryUsedEvent, EncounterPhaseEvent, MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./battle-scene-events";
+import { BerryUsedEvent, EncounterPhaseEvent, MoveUsedEvent, TurnEndEvent, TurnInitEvent } from "./events/battle-scene";
 import { ExpNotification } from "./enums/exp-notification";
 import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
 import {BattlePhase} from "#app/phases/battle-phase";
@@ -638,7 +630,14 @@ export abstract class FieldPhase extends BattlePhase {
     const enemyField = this.scene.getEnemyField().filter(p => p.isActive()) as Pokemon[];
 
     // We shuffle the list before sorting so speed ties produce random results
-    let orderedTargets: Pokemon[] = Utils.randSeedShuffle(playerField.concat(enemyField)).sort((a: Pokemon, b: Pokemon) => {
+    let orderedTargets: Pokemon[] = playerField.concat(enemyField);
+    // We seed it with the current turn to prevent an inconsistency where it
+    // was varying based on how long since you last reloaded
+    this.scene.executeWithSeedOffset(() => {
+      orderedTargets = Utils.randSeedShuffle(orderedTargets);
+    }, this.scene.currentBattle.turn, this.scene.waveSeed);
+
+    orderedTargets.sort((a: Pokemon, b: Pokemon) => {
       const aSpeed = a?.getBattleStat(Stat.SPD) || 0;
       const bSpeed = b?.getBattleStat(Stat.SPD) || 0;
 
@@ -1047,7 +1046,15 @@ export class EncounterPhase extends BattlePhase {
     });
 
     if (this.scene.currentBattle.battleType !== BattleType.TRAINER) {
-      enemyField.map(p => this.scene.pushPhase(new PostSummonPhase(this.scene, p.getBattlerIndex())));
+      enemyField.map(p => this.scene.pushConditionalPhase(new PostSummonPhase(this.scene, p.getBattlerIndex()), () => {
+        // is the player party initialized ?
+        const a = !!this.scene.getParty()?.length;
+        // how many player pokemon are on the field ?
+        const amountOnTheField = this.scene.getParty().filter(p => p.isOnField()).length;
+        // if it's a double, there should be 2, otherwise 1
+        const b = this.scene.currentBattle.double ? amountOnTheField === 2 : amountOnTheField === 1;
+        return a && b;
+      }));
       const ivScannerModifier = this.scene.findModifier(m => m instanceof IvScannerModifier);
       if (ivScannerModifier) {
         enemyField.map(p => this.scene.pushPhase(new ScanIvsPhase(this.scene, p.getBattlerIndex(), Math.min(ivScannerModifier.getStackCount() * 2, 6))));
@@ -1204,6 +1211,9 @@ export class PostSummonPhase extends PokemonPhase {
 
     const pokemon = this.getPokemon();
 
+    if (pokemon.status?.effect === StatusEffect.TOXIC) {
+      pokemon.status.turnCount = 0;
+    }
     this.scene.arena.applyTags(ArenaTrapTag, pokemon);
     applyPostSummonAbAttrs(PostSummonAbAttr, pokemon).then(() => this.end());
   }
@@ -1566,7 +1576,6 @@ export class SummonPhase extends PartyMemberPokemonPhase {
 
     if (!this.loaded || this.scene.currentBattle.battleType === BattleType.TRAINER || this.scene.currentBattle.battleType === BattleType.MYSTERY_ENCOUNTER || (this.scene.currentBattle.waveIndex % 10) === 1) {
       this.scene.triggerPokemonFormChange(pokemon, SpeciesFormChangeActiveTrigger, true);
-
       this.queuePostSummon();
     }
   }
@@ -3729,7 +3738,7 @@ export class FaintPhase extends PokemonPhase {
       this.scene.currentBattle.enemyFaints += 1;
     }
 
-    this.scene.queueMessage(getPokemonMessage(pokemon, " fainted!"), null, true);
+    this.scene.queueMessage(i18next.t("battle:fainted", { pokemonNameWithAffix: getPokemonNameWithAffix(pokemon) }), null, true);
 
     if (pokemon.turnData?.attacksReceived?.length) {
       const lastAttack = pokemon.turnData.attacksReceived[0];
@@ -4068,111 +4077,17 @@ export class ModifierRewardPhase extends BattlePhase {
   start() {
     super.start();
 
-    this.doReward().then(() => {
-      this.end();
-    });
+    this.doReward().then(() => this.end());
   }
 
   doReward(): Promise<void> {
     return new Promise<void>(resolve => {
-      const party = this.scene.getParty();
-      if (this.modifierType instanceof ModifierTypeGenerator) {
-        this.modifierType = this.modifierType.generateType(party, [this.modifierType]).withIdFromFunc(modifierTypes[this.modifierType.name]);
-      }
-
-      if (this.modifierType instanceof PokemonModifierType) {
-        if (this.modifierType instanceof FusePokemonModifierType) {
-          // Fusion, enter party selection screen
-          this.scene.ui.showText(`You received\n${this.modifierType.name}!`, null, () => this.doFusion().then(() => resolve()), null, true);
-
-        } else {
-          // Other type of pokemon modifier
-          this.scene.ui.showText(`You received\n${this.modifierType.name}!`, null, () => this.doPokemonModify().then(() => resolve()), null, true);
-        }
-      } else {
-        // Standard item reward
-        const newModifier = this.modifierType.newModifier();
-        this.scene.addModifier(newModifier).then(() => {
-          this.scene.playSound("item_fanfare");
-          this.scene.ui.showText(`You received\n${newModifier.type.name}!`, null, () => resolve(), null, true);
-        });
-      }
+      const newModifier = this.modifierType.newModifier();
+      this.scene.addModifier(newModifier).then(() => {
+        this.scene.playSound("item_fanfare");
+        this.scene.ui.showText(`You received\n${newModifier.type.name}!`, null, () => resolve(), null, true);
+      });
     });
-  }
-
-  doFusion() {
-    const party = this.scene.getParty();
-    const modifierType = this.modifierType as FusePokemonModifierType;
-    return this.scene.ui.setModeWithoutClear(Mode.PARTY, PartyUiMode.SPLICE, -1, (fromSlotIndex: integer, spliceSlotIndex: integer) => {
-      // On exit of party screen, do fusion
-      if (spliceSlotIndex !== undefined && fromSlotIndex < 6 && spliceSlotIndex < 6 && fromSlotIndex !== spliceSlotIndex) {
-        this.scene.ui.setMode(Mode.MODIFIER_SELECT, true).then(() => {
-          const modifier = modifierType.newModifier(party[fromSlotIndex], party[spliceSlotIndex]);
-          this.scene.addModifier(modifier).then(() => {
-            this.scene.playSound("item_fanfare");
-            this.scene.ui.showText("Fusion complete!", null, () => this.end(), null, true);
-          });
-        });
-      } else {
-        // If selection was cancelled, offer second chance to reselect
-        this.scene.ui.showText("Are you sure you want to cancel the fusion?", null, () => {
-          this.scene.ui.setOverlayMode(Mode.CONFIRM, () => {
-            // End phase and continue
-            this.scene.ui.revertMode();
-            this.scene.ui.setMode(Mode.MESSAGE);
-            super.end();
-          }, () => {
-            // repeat doFusion
-            return this.doFusion();
-          });
-        });
-      }
-    }, modifierType.selectFilter);
-  }
-
-  doPokemonModify() {
-    const party = this.scene.getParty();
-    const modifierType = this.modifierType as FusePokemonModifierType;
-    const pokemonModifierType = modifierType as PokemonModifierType;
-    const isMoveModifier = modifierType instanceof PokemonMoveModifierType;
-    const isTmModifier = modifierType instanceof TmModifierType;
-    const isRememberMoveModifier = modifierType instanceof RememberMoveModifierType;
-    const isPpRestoreModifier = (modifierType instanceof PokemonPpRestoreModifierType || modifierType instanceof PokemonPpUpModifierType);
-    const partyUiMode = isMoveModifier ? PartyUiMode.MOVE_MODIFIER
-      : isTmModifier ? PartyUiMode.TM_MODIFIER
-        : isRememberMoveModifier ? PartyUiMode.REMEMBER_MOVE_MODIFIER
-          : PartyUiMode.MODIFIER;
-    const tmMoveId = isTmModifier
-      ? (modifierType as TmModifierType).moveId
-      : undefined;
-    return this.scene.ui.setModeWithoutClear(Mode.PARTY, partyUiMode, -1, (slotIndex: integer, option: PartyOption) => {
-      if (slotIndex < 6) {
-        this.scene.ui.setMode(Mode.MODIFIER_SELECT, true).then(() => {
-          const modifier = !isMoveModifier
-            ? !isRememberMoveModifier
-              ? this.modifierType.newModifier(party[slotIndex])
-              : this.modifierType.newModifier(party[slotIndex], option as integer)
-            : this.modifierType.newModifier(party[slotIndex], option - PartyOption.MOVE_1);
-          this.scene.addModifier(modifier, false, true).then(() => {
-            this.scene.playSound("item_fanfare");
-            this.scene.ui.showText(`You received\n${modifier.type.name}!`, null, () => this.end(), null, true);
-          });
-        });
-      } else {
-        // If selection was cancelled, offer second chance to reselect
-        this.scene.ui.showText(`Are you sure you want to continue\nwithout using the ${modifierType.name}?`, null, () => {
-          this.scene.ui.setOverlayMode(Mode.CONFIRM, () => {
-            // End phase and continue
-            this.scene.ui.revertMode();
-            this.scene.ui.setMode(Mode.MESSAGE);
-            super.end();
-          }, () => {
-            // repeat doPokemonModify
-            return this.doPokemonModify();
-          });
-        });
-      }
-    }, pokemonModifierType.selectFilter, modifierType instanceof PokemonMoveModifierType ? (modifierType as PokemonMoveModifierType).moveSelectFilter : undefined, tmMoveId, isPpRestoreModifier);
   }
 }
 
@@ -5176,15 +5091,15 @@ export class EggLapsePhase extends Phase {
       return Overrides.IMMEDIATE_HATCH_EGGS_OVERRIDE ? true : --egg.hatchWaves < 1;
     });
 
-    let eggsToHatchCount: integer = eggsToHatch.length;
+    let eggCount: integer = eggsToHatch.length;
 
-    if (eggsToHatchCount) {
+    if (eggCount) {
       this.scene.queueMessage(i18next.t("battle:eggHatching"));
 
       for (const egg of eggsToHatch) {
-        this.scene.unshiftPhase(new EggHatchPhase(this.scene, egg, eggsToHatchCount));
-        if (eggsToHatchCount > 0) {
-          eggsToHatchCount--;
+        this.scene.unshiftPhase(new EggHatchPhase(this.scene, egg, eggCount));
+        if (eggCount > 0) {
+          eggCount--;
         }
       }
 

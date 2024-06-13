@@ -15,7 +15,6 @@ import {TimeOfDay} from "#app/data/enums/time-of-day";
 import { Gender } from "./data/gender";
 import { StatusEffect } from "./data/status-effect";
 import { modifierTypes } from "./modifier/modifier-type";
-import {MysteryEncounterType} from "#app/data/enums/mystery-encounter-type";
 
 /**
  * Overrides for testing different in game situations
@@ -80,7 +79,7 @@ export const VARIANT_OVERRIDE: Variant = 0;
 export const OPP_SPECIES_OVERRIDE: Species | integer = 0;
 export const OPP_LEVEL_OVERRIDE: number = 0;
 export const OPP_ABILITY_OVERRIDE: Abilities = Abilities.NONE;
-export const OPP_PASSIVE_ABILITY_OVERRIDE = Abilities.NONE;
+export const OPP_PASSIVE_ABILITY_OVERRIDE: Abilities = Abilities.NONE;
 export const OPP_STATUS_OVERRIDE: StatusEffect = StatusEffect.NONE;
 export const OPP_GENDER_OVERRIDE: Gender = null;
 export const OPP_MOVESET_OVERRIDE: Array<Moves> = [];
@@ -92,9 +91,9 @@ export const OPP_VARIANT_OVERRIDE: Variant = 0;
  */
 
 // 1 to 64 (out of 64), set to null to ignore
-export const MYSTERY_ENCOUNTER_RATE_OVERRIDE: number = 100;
+export const MYSTERY_ENCOUNTER_RATE_OVERRIDE: number = null;
 // Can use MysteryEncounterType, set to null to ignore (e.g. MysteryEncounterType.DARK_DEAL)
-export const MYSTERY_ENCOUNTER_OVERRIDE: number = MysteryEncounterType.FIGHT_OR_FLIGHT;
+export const MYSTERY_ENCOUNTER_OVERRIDE: number = null;
 
 /**
  * MODIFIER / ITEM OVERRIDES

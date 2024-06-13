@@ -118,10 +118,13 @@ export default class MysteryEncounter implements MysteryEncounter {
     this.encounterTier = this.encounterTier ? this.encounterTier : MysteryEncounterTier.COMMON;
     this.dialogue = allMysteryEncounterDialogue[this.encounterType];
     this.encounterVariant = MysteryEncounterVariant.DEFAULT;
-    this.lockEncounterRewardTiers = true;
-    this.dialogueTokens = this.dialogueTokens ? this.dialogueTokens : [];
     this.requirements = this.requirements ? this.requirements : [];
-    this.enemyPartyConfigs = this.enemyPartyConfigs ? this.enemyPartyConfigs : [];
+
+    // Reset any dirty flags or encounter data
+    this.lockEncounterRewardTiers = true;
+    this.dialogueTokens = [];
+    this.enemyPartyConfigs = [];
+    this.introVisuals = null;
   }
 
   /**

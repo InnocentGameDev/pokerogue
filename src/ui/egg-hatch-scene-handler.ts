@@ -1,11 +1,19 @@
 import BattleScene from "../battle-scene";
-import { EggHatchPhase } from "../phases/egg-hatch-phase";
+import { EggHatchPhase } from "../egg-hatch-phase";
 import { Mode } from "./ui";
 import UiHandler from "./ui-handler";
 import {Button} from "../enums/buttons";
 
 export default class EggHatchSceneHandler extends UiHandler {
   public eggHatchContainer: Phaser.GameObjects.Container;
+
+  /**
+   * Allows subscribers to listen for events
+   *
+   * Current Events:
+   * - {@linkcode EggEventType.EGG_COUNT_CHANGED} {@linkcode EggCountChangedEvent}
+   */
+  public readonly eventTarget: EventTarget = new EventTarget();
 
   constructor(scene: BattleScene) {
     super(scene, Mode.EGG_HATCH_SCENE);

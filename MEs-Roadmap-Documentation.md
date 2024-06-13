@@ -2,6 +2,8 @@
 
 - ### High priority
     - 🐛 Opening the chest simply moves you to a wild battle against nothingness, which you can escape after you get bored of it.
+    - 🐛 Picking up certain items in Fight or Flight is still broken. Workaround is leave encounter.
+    - 🐛 Modifiers that are applied to pokemon get skipped in Fight or Flight. 
 
 - ### Medium priority
     - 🐛 PKMN Sprites and their HP/lvl bar doesn't get properly recalled when finding an ME or when meeting Rival. 🛠️
@@ -10,6 +12,9 @@
     - ⚙️ "Steal from player" functionality (Gholdengo ME) ❌
     - ⚙️ Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs ❌
     - ⚙️ Push Dark Deal ME to a higher wave requirement (+30) as it seems to be functioning (mostly) bugless.
+
+- ### Low priority
+    - 🐛 Mysterious Challengers can spawn two trainers of the same type
 
 
 # 📝 Things to be done before Mystery Encounters ("~~~~MEs") MVP is finished:

@@ -41,7 +41,7 @@ import { addUiThemeOverrides } from "./ui/ui-theme";
 import PokemonData from "./system/pokemon-data";
 import { Nature } from "./data/nature";
 import { SpeciesFormChangeTimeOfDayTrigger, SpeciesFormChangeTrigger, pokemonFormChanges } from "./data/pokemon-forms";
-import { FormChangePhase, QuietFormChangePhase } from "./phases/form-change-phase";
+import { FormChangePhase, QuietFormChangePhase } from "./form-change-phase";
 import { BattleSpec } from "./enums/battle-spec";
 import { getTypeRgb } from "./data/type";
 import PokemonSpriteSparkleHandler from "./field/pokemon-sprite-sparkle-handler";
@@ -58,7 +58,7 @@ import * as Overrides from "./overrides";
 import {InputsController} from "./inputs-controller";
 import {UiInputs} from "./ui-inputs";
 import { MoneyFormat } from "./enums/money-format";
-import { NewArenaEvent } from "./battle-scene-events";
+import { NewArenaEvent } from "./events/battle-scene";
 import { Abilities } from "./data/enums/abilities";
 import ArenaFlyout from "./ui/arena-flyout";
 import { EaseType } from "./ui/enums/ease-type";
@@ -171,6 +171,7 @@ export default class BattleScene extends SceneBase {
   public sessionSlotId: integer;
 
   public phaseQueue: Phase[];
+  public conditionalQueue: Array<[() => boolean, Phase]>;
   private phaseQueuePrepend: Phase[];
   private phaseQueuePrependSpliceIndex: integer;
   private nextCommandPhaseQueue: Phase[];
@@ -256,6 +257,7 @@ export default class BattleScene extends SceneBase {
     super("battle");
     this.phaseQueue = [];
     this.phaseQueuePrepend = [];
+    this.conditionalQueue = [];
     this.phaseQueuePrependSpliceIndex = -1;
     this.nextCommandPhaseQueue = [];
     this.updateGameInfo();
@@ -1079,9 +1081,12 @@ export default class BattleScene extends SceneBase {
 
       // If Encounter has an onInit() function, call it
       // Usually used for calculating rand data before initializing anything visual
-      if (newEncounter.onInit) {
-        newEncounter.onInit(this);
-      }
+      this.executeWithSeedOffset(() => {
+        if (newEncounter.onInit) {
+          newEncounter.onInit(this);
+        }
+      }, this.currentBattle.waveIndex);
+
 
       // Add intro visuals for mystery encounter
       newEncounter.initIntroVisuals(this);
@@ -1903,6 +1908,21 @@ export default class BattleScene extends SceneBase {
     return this.standbyPhase;
   }
 
+  /**
+   * Adds a phase to the conditional queue and ensures it is executed only when the specified condition is met.
+   *
+   * This method allows deferring the execution of a phase until certain conditions are met, which is useful for handling
+   * situations like abilities and entry hazards that depend on specific game states.
+   *
+   * @param {Phase} phase - The phase to be added to the conditional queue.
+   * @param {() => boolean} condition - A function that returns a boolean indicating whether the phase should be executed.
+   *
+   */
+  pushConditionalPhase(phase: Phase, condition: () => boolean): void {
+    this.conditionalQueue.push([condition, phase]);
+  }
+
+
   pushPhase(phase: Phase, defer: boolean = false): void {
     (!defer ? this.phaseQueue : this.nextCommandPhaseQueue).push(phase);
   }
@@ -1946,6 +1966,21 @@ export default class BattleScene extends SceneBase {
       this.populatePhaseQueue();
     }
     this.currentPhase = this.phaseQueue.shift();
+
+    // Check if there are any conditional phases queued
+    if (this.conditionalQueue?.length) {
+      // Retrieve the first conditional phase from the queue
+      const conditionalPhase = this.conditionalQueue.shift();
+      // Evaluate the condition associated with the phase
+      if (conditionalPhase[0]()) {
+        // If the condition is met, add the phase to the front of the phase queue
+        this.unshiftPhase(conditionalPhase[1]);
+      } else {
+        // If the condition is not met, re-add the phase back to the front of the conditional queue
+        this.conditionalQueue.unshift(conditionalPhase);
+      }
+    }
+
     this.currentPhase.start();
   }
 

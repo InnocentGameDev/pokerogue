@@ -7,6 +7,7 @@ import { MysteryEncounterType } from "../enums/mystery-encounter-type";
 import { Species } from "../enums/species";
 import { WaveCountRequirement } from "../mystery-encounter-requirements";
 import { MysteryEncounterOptionBuilder } from "../mystery-encounter-option";
+import {GameOverPhase} from "#app/phases";
 
 export const MysteriousChestEncounter: MysteryEncounter = new MysteryEncounterBuilder()
   .withEncounterType(MysteryEncounterType.MYSTERIOUS_CHEST)
@@ -50,10 +51,19 @@ export const MysteriousChestEncounter: MysteryEncounter = new MysteryEncounterBu
         // Your highest level unfainted Pok�mon gets OHKO. Progress with no rewards (35%)
         const highestLevelPokemon = getHighestLevelPlayerPokemon(scene, true);
         koPlayerPokemon(highestLevelPokemon);
+
         scene.currentBattle.mysteryEncounter.dialogueTokens.push([/@ec\{pokeName\}/gi, highestLevelPokemon.name]);
         // Show which Pokemon was KOed, then leave encounter with no rewards
         await showEncounterText(scene, "mysteryEncounter:mysterious_chest_option_1_bad_result")
-          .then(() => leaveEncounterWithoutBattle(scene));
+          .then(() => {
+            if (scene.getParty().filter(p => p.isAllowedInBattle()).length === 0) {
+              // Game over
+              scene.clearPhaseQueue();
+              scene.unshiftPhase(new GameOverPhase(scene));
+            } else {
+              leaveEncounterWithoutBattle(scene);
+            }
+          });
       }
     })
     .build())
