@@ -80,8 +80,8 @@ export class PartySizeRequirement implements EncounterRequirement {
   partySizeRange: [number, number];
 
   /**
-   * Used for specifying a unique wave or wave range requirement
-   * If minWaveIndex and maxWaveIndex are equivalent, will check for exact wave number
+   * Used for specifying a party size requirement
+   * If min and max are equivalent, will check for exact size
    * @param partySizeRange - [min, max]
    */
   constructor(partySizeRange: [number, number]) {

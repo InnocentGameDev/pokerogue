@@ -72,13 +72,7 @@ export default class MysteryEncounterUiHandler extends UiHandler {
     this.descriptionContainer.setVisible(true);
     this.optionsContainer.setVisible(true);
     this.displayEncounterOptions(!(args[0] as boolean || false));
-    const cursor = this.getCursor();
-    if (cursor === (this?.optionsContainer?.length || 0) - 1) {
-      // Always resets cursor on view party button if it was last there
-      this.setCursor(cursor);
-    } else {
-      this.setCursor(0);
-    }
+    this.setCursor(this.getCursor());
     if (this.blockInput) {
       setTimeout(() => {
         this.unblockInput();
