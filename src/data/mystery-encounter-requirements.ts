@@ -1,3 +1,4 @@
+import { PlayerPokemon } from "#app/field/pokemon";
 import BattleScene from "../battle-scene";
 import { isNullOrUndefined } from "../utils";
 import { Abilities } from "./enums/abilities";
@@ -6,7 +7,7 @@ import { Species } from "./enums/species";
 import { WeatherType } from "./weather";
 
 export interface EncounterRequirement {
-  meetsRequirement(scene: BattleScene): boolean;
+  partyQuery(scene: BattleScene): boolean;
 }
 
 export class WaveCountRequirement implements EncounterRequirement {
@@ -21,7 +22,7 @@ export class WaveCountRequirement implements EncounterRequirement {
     this.waveRange = waveRange;
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): PlayerPokemon[] {
     if (!isNullOrUndefined(this?.waveRange) && this.waveRange?.[0] <= this.waveRange?.[1]) {
       const waveIndex = scene.currentBattle.waveIndex;
       if (waveIndex >= 0 && (this?.waveRange?.[0] >= 0 && this.waveRange?.[0] > waveIndex) || (this?.waveRange?.[1] >= 0 && this.waveRange?.[1] < waveIndex)) {
@@ -45,7 +46,7 @@ export class BiomeRequirement implements EncounterRequirement {
     }
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): boolean {
     const currentBiome = scene.arena?.biomeType;
     if (!isNullOrUndefined(currentBiome) && this?.requiredBiomes?.length > 0 && !this.requiredBiomes.includes(currentBiome)) {
       return false;
@@ -66,7 +67,7 @@ export class WeatherRequirement implements EncounterRequirement {
     }
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): boolean {
     const currentWeather = scene.arena?.weather?.weatherType;
     if (!isNullOrUndefined(currentWeather) && this?.requiredWeather?.length > 0 && !this.requiredWeather.includes(currentWeather)) {
       return false;
@@ -92,7 +93,7 @@ export class PartySpeciesRequirement implements EncounterRequirement {
     }
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
     if (!isNullOrUndefined(partyPokemon) && this?.requiredPartyPokemon?.length > 0 && partyPokemon.filter((pokemon) => this.requiredPartyPokemon.includes(pokemon.species.speciesId)).length === 0) {
       return false;
@@ -118,7 +119,7 @@ export class PartyAbilityRequirement implements EncounterRequirement {
     }
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
     if (!isNullOrUndefined(partyPokemon) && this?.requiredAbilities?.length > 0 && partyPokemon.filter((pokemon) => this.requiredAbilities.filter((ability) => pokemon.hasAbility(ability)).length > 0).length === 0) {
       return false;
@@ -140,7 +141,7 @@ export class PartyItemRequirement implements EncounterRequirement {
     }
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): boolean {
     // TODO: Item reqs
 
     return true;
@@ -158,7 +159,7 @@ export class PartyLevelRequirement implements EncounterRequirement {
     this.requiredPartyLevel = levelTotal;
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): boolean {
     let partyLevel = 0;
     const partyPokemon = scene.getParty();
     partyPokemon?.forEach((pokemon) => partyLevel += pokemon.level);
@@ -182,7 +183,7 @@ export class PokemonLevelRequirement implements EncounterRequirement {
     this.requiredLevelRange = levelRange;
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): boolean {
     // Party Pokemon inside required level range
     if (!isNullOrUndefined(this?.requiredLevelRange) && this.requiredLevelRange?.[0] <= this.requiredLevelRange?.[1]) {
       const partyPokemon = scene.getParty();
@@ -203,7 +204,7 @@ export class MoneyRequirement implements EncounterRequirement {
     this.requiredMoney = requiredMoney;
   }
 
-  meetsRequirement(scene: BattleScene): boolean {
+  partyQuery(scene: BattleScene): boolean {
     const money = scene.money;
     if (!isNullOrUndefined(money) && this?.requiredMoney > 0 && this.requiredMoney > money) {
       return false;

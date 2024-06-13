@@ -131,7 +131,7 @@ export default class MysteryEncounter implements MysteryEncounter {
    * @returns
    */
   meetsRequirements?(scene: BattleScene) {
-    return !this.requirements.some(requirement => !requirement.meetsRequirement(scene));
+    return !this.requirements.some(requirement => !requirement.partyQuery(scene));
   }
 
   /**
