@@ -11,23 +11,39 @@ import { EvolutionItem, pokemonEvolutions } from "./pokemon-evolutions";
 import { FormChangeItem, SpeciesFormChangeItemTrigger, pokemonFormChanges } from "./pokemon-forms";
 import { SpeciesFormKey } from "./pokemon-species";
 import { Status } from "./status-effect";
+import { Type } from "./type";
 import { WeatherType } from "./weather";
 
 export interface EncounterRequirement {
   meetsRequirement(scene: BattleScene): boolean; // Boolean to see if a requirement is met
 }
 
-export interface EncounterPokemonRequirement extends EncounterRequirement {
-  // TODO: This could probably be an abstract class, since all the meetsRequirements ends up looking the same. Need to figure out generic array typing though
-  // One could even abstract everything but the comparator function and just pass that in as a callback.
-  minNumberOfPokemon:number;
-  invertQuery:boolean;
-  // Returns all party members that are compatible with this requirement. For non pokemon related requirements, the entire party is returned..
-  queryParty(partyPokemon: PlayerPokemon[]): PlayerPokemon[];
+export abstract class EncounterSceneRequirement implements EncounterRequirement {
+  meetsRequirement(scene: BattleScene): boolean {
+    throw new Error("Method not implemented.");
+  }
 
 }
 
-export class WaveCountRequirement implements EncounterRequirement {
+export abstract class EncounterPokemonRequirement implements EncounterRequirement {
+
+  // TODO: This could probably be an abstract class, since all the meetsRequirements ends up looking the same. Need to figure out generic array typing though
+  // One could even abstract everything but the comparator function for queryParty and just pass that in as a callback.
+  minNumberOfPokemon:number;
+  invertQuery:boolean;
+
+  meetsRequirement(scene: BattleScene): boolean {
+    throw new Error("Method not implemented.");
+  }
+
+  // Returns all party members that are compatible with this requirement. For non pokemon related requirements, the entire party is returned..
+  queryParty(partyPokemon: PlayerPokemon[]) {
+    return [];
+  }
+
+}
+
+export class WaveCountRequirement extends EncounterSceneRequirement {
   waveRange: [number, number];
 
   /**
@@ -36,6 +52,7 @@ export class WaveCountRequirement implements EncounterRequirement {
    * @param waveRange - [min, max]
    */
   constructor(waveRange: [number, number]) {
+    super();
     this.waveRange = waveRange;
   }
 
@@ -52,10 +69,11 @@ export class WaveCountRequirement implements EncounterRequirement {
   }
 }
 
-export class TimeOfDayRequirement implements EncounterRequirement {
+export class TimeOfDayRequirement extends EncounterSceneRequirement {
   requiredTimeOfDay?: TimeOfDay[];
 
   constructor(timeOfDay: TimeOfDay | TimeOfDay[]) {
+    super();
     if (timeOfDay instanceof Array) {
       this.requiredTimeOfDay = timeOfDay;
     } else {
@@ -73,10 +91,11 @@ export class TimeOfDayRequirement implements EncounterRequirement {
   }
 }
 
-export class WeatherRequirement implements EncounterRequirement {
+export class WeatherRequirement extends EncounterSceneRequirement {
   requiredWeather?: WeatherType[];
 
   constructor(weather: WeatherType | WeatherType[]) {
+    super();
     if (weather instanceof Array) {
       this.requiredWeather = weather;
     } else {
@@ -93,7 +112,7 @@ export class WeatherRequirement implements EncounterRequirement {
     return true;
   }
 }
-export class PartySizeRequirement implements EncounterRequirement {
+export class PartySizeRequirement extends EncounterSceneRequirement {
   partySizeRange: [number, number];
 
   /**
@@ -102,6 +121,7 @@ export class PartySizeRequirement implements EncounterRequirement {
    * @param partySizeRange - [min, max]
    */
   constructor(partySizeRange: [number, number]) {
+    super();
     this.partySizeRange = partySizeRange;
   }
 
@@ -117,9 +137,10 @@ export class PartySizeRequirement implements EncounterRequirement {
   }
 }
 
-export class PersistentModifierRequirement implements EncounterRequirement {
+export class PersistentModifierRequirement extends EncounterSceneRequirement {
   requiredItems?: ModifierType[]; // TODO: not implemented
   constructor(item: ModifierType | ModifierType[]) {
+    super();
     if (item instanceof Array) {
       this.requiredItems = item;
     } else {
@@ -138,10 +159,11 @@ export class PersistentModifierRequirement implements EncounterRequirement {
   }
 }
 
-export class MoneyRequirement implements EncounterRequirement {
+export class MoneyRequirement extends EncounterSceneRequirement {
   requiredMoney: number;
 
   constructor(requiredMoney: number) {
+    super();
     this.requiredMoney = requiredMoney;
   }
 
@@ -154,12 +176,13 @@ export class MoneyRequirement implements EncounterRequirement {
   }
 }
 
-export class SpeciesRequirement implements EncounterPokemonRequirement {
+export class SpeciesRequirement extends EncounterPokemonRequirement {
   requiredSpecies: Species[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(species: Species | Species[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (species instanceof Array) {
@@ -188,12 +211,13 @@ export class SpeciesRequirement implements EncounterPokemonRequirement {
 }
 
 
-export class NatureRequirement implements EncounterPokemonRequirement {
+export class NatureRequirement extends EncounterPokemonRequirement {
   requiredNature: Nature[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(nature: Nature | Nature[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (nature instanceof Array) {
@@ -221,13 +245,48 @@ export class NatureRequirement implements EncounterPokemonRequirement {
   }
 }
 
+export class TypeRequirement extends EncounterPokemonRequirement {
+  requiredType: Type[];
+  minNumberOfPokemon:number;
+  invertQuery:boolean;
 
-export class MoveRequirement implements EncounterPokemonRequirement {
-  requiredMoves: Moves[];
+  constructor(type: Type | Type[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
+    this.minNumberOfPokemon = minNumberOfPokemon;
+    this.invertQuery = invertQuery;
+    if (type instanceof Array) {
+      this.requiredType = type;
+    } else {
+      this.requiredType.push(type);
+    }
+  }
+
+  meetsRequirement(scene: BattleScene): boolean {
+    const partyPokemon = scene.getParty();
+    if (!isNullOrUndefined(partyPokemon) && this?.requiredType?.length > 0) {
+      return false;
+    }
+    return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
+  }
+
+  queryParty(partyPokemon: PlayerPokemon[]): PlayerPokemon[] {
+    if (!this.invertQuery) {
+      return partyPokemon.filter((pokemon) => this.requiredType.filter((type) => pokemon.getTypes().includes(type)).length > 0);
+    } else {
+      // for an inverted query, we only want to get the pokemon that don't have ANY of the listed types
+      return partyPokemon.filter((pokemon) => this.requiredType.filter((type) => pokemon.getTypes().includes(type)).length === 0);
+    }
+  }
+}
+
+
+export class MoveRequirement extends EncounterPokemonRequirement {
+  requiredMoves: Moves[] = [];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(moves: Moves | Moves[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (moves instanceof Array) {
@@ -260,12 +319,13 @@ export class MoveRequirement implements EncounterPokemonRequirement {
  * NOTE: Egg moves are not included as learnable.
  * NOTE: If the Pokemon already knows the move, this requirement will fail, since it's not technically learnable.
  */
-export class CanLearnMoveRequirement implements EncounterPokemonRequirement {
+export class CanLearnMoveRequirement extends EncounterPokemonRequirement {
   requiredMoves: Moves[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(learnableMove: Moves | Moves[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (learnableMove instanceof Array) {
@@ -294,12 +354,13 @@ export class CanLearnMoveRequirement implements EncounterPokemonRequirement {
 
 }
 
-export class EvolutionTargetSpeciesRequirement implements EncounterPokemonRequirement {
+export class EvolutionTargetSpeciesRequirement extends EncounterPokemonRequirement {
   requiredEvolutionTargetSpecies: Species[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(evolutionTargetSpecies: Species | Species[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (evolutionTargetSpecies instanceof Array) {
@@ -328,12 +389,13 @@ export class EvolutionTargetSpeciesRequirement implements EncounterPokemonRequir
 
 }
 
-export class AbilityRequirement implements EncounterPokemonRequirement {
+export class AbilityRequirement extends EncounterPokemonRequirement {
   requiredAbilities: Abilities[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(abilities: Abilities | Abilities[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (abilities instanceof Array) {
@@ -361,12 +423,13 @@ export class AbilityRequirement implements EncounterPokemonRequirement {
   }
 }
 
-export class StatusRequirement implements EncounterPokemonRequirement {
+export class StatusRequirement extends EncounterPokemonRequirement {
   requiredStatus: Status[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(status: Status | Status[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (status instanceof Array) {
@@ -399,12 +462,13 @@ export class StatusRequirement implements EncounterPokemonRequirement {
  * Notice that we mean specific items, like Charizardite, not the Mega Bracelet.
  * If you want to trigger the event based on the form change enabler, use PersistentModifierRequirement.
  */
-export class CanFormChangeWithItemRequirement implements EncounterPokemonRequirement {
+export class CanFormChangeWithItemRequirement extends EncounterPokemonRequirement {
   requiredFormChangeItem: FormChangeItem[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(formChangeItem: FormChangeItem | FormChangeItem[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (formChangeItem instanceof Array) {
@@ -446,12 +510,13 @@ export class CanFormChangeWithItemRequirement implements EncounterPokemonRequire
 
 }
 
-export class CanEvolveWithItemRequirement implements EncounterPokemonRequirement {
+export class CanEvolveWithItemRequirement extends EncounterPokemonRequirement {
   requiredEvolutionItem: EvolutionItem[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(evolutionItems: EvolutionItem | EvolutionItem[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (evolutionItems instanceof Array) {
@@ -490,12 +555,13 @@ export class CanEvolveWithItemRequirement implements EncounterPokemonRequirement
   }
 }
 
-export class HeldItemRequirement implements EncounterPokemonRequirement {
+export class HeldItemRequirement extends EncounterPokemonRequirement {
   requiredHeldItemModifier: PokemonHeldItemModifierType[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(heldItem: PokemonHeldItemModifierType | PokemonHeldItemModifierType[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     if (heldItem instanceof Array) {
@@ -525,12 +591,13 @@ export class HeldItemRequirement implements EncounterPokemonRequirement {
 }
 
 
-export class LevelRequirement implements EncounterPokemonRequirement {
+export class LevelRequirement extends EncounterPokemonRequirement {
   requiredLevelRange?: [number, number];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(requiredLevelRange: [number, number], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     this.requiredLevelRange = requiredLevelRange;
@@ -559,12 +626,13 @@ export class LevelRequirement implements EncounterPokemonRequirement {
   }
 }
 
-export class FriendshipRequirement implements EncounterPokemonRequirement {
+export class FriendshipRequirement extends EncounterPokemonRequirement {
   requiredFriendshipRange?: [number, number];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(requiredFriendshipRange: [number, number], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     this.requiredFriendshipRange = requiredFriendshipRange;
@@ -597,12 +665,13 @@ export class FriendshipRequirement implements EncounterPokemonRequirement {
  * .5 -> 50% hp
  * 1 -> 100% hp
  */
-export class HealthRatioRequirement implements EncounterPokemonRequirement {
+export class HealthRatioRequirement extends EncounterPokemonRequirement {
   requiredHealthRange?: [number, number];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(requiredHealthRange: [number, number], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     this.requiredHealthRange = requiredHealthRange;
@@ -630,12 +699,13 @@ export class HealthRatioRequirement implements EncounterPokemonRequirement {
   }
 }
 
-export class WeightRequirement implements EncounterPokemonRequirement {
+export class WeightRequirement extends EncounterPokemonRequirement {
   requiredWeightRange?: [number, number];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
   constructor(requiredWeightRange: [number, number], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+    super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
     this.requiredWeightRange = requiredWeightRange;

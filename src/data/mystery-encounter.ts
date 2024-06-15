@@ -5,7 +5,7 @@ import MysteryEncounterDialogue, {
   allMysteryEncounterDialogue
 } from "./mystery-encounters/dialogue/mystery-encounter-dialogue";
 import MysteryEncounterOption from "./mystery-encounter-option";
-import { EncounterPokemonRequirement, EncounterRequirement } from "./mystery-encounter-requirements";
+import { EncounterPokemonRequirement, EncounterRequirement, EncounterSceneRequirement } from "./mystery-encounter-requirements";
 import * as Utils from "../utils";
 import {EnemyPartyConfig} from "#app/utils/mystery-encounter-utils";
 import { PlayerPokemon } from "#app/field/pokemon";
@@ -37,7 +37,7 @@ export default interface MysteryEncounter {
    * Optional params
    */
   encounterTier?: MysteryEncounterTier;
-  requirements?: EncounterRequirement[];
+  requirements?: EncounterSceneRequirement[];
   protagonistPokemonRequirements?: EncounterPokemonRequirement[];
   supportPokemonRequirements ?: EncounterPokemonRequirement[];
   protagonistPokemon?: PlayerPokemon;
@@ -142,6 +142,49 @@ export default class MysteryEncounter implements MysteryEncounter {
     return !this.requirements.some(requirement => !requirement.meetsRequirement(scene));
   }
 
+  meetsProtagonistRequirementAndProtagonistPokemonSelected?(scene: BattleScene) {
+    if (!this.protagonistPokemonRequirements) {
+      return true;
+    }
+    let qualified:PlayerPokemon[] = scene.getParty();
+    for (const req of this.protagonistPokemonRequirements) {
+      console.log(req);
+      if (req.meetsRequirement(scene)) {
+        if (req instanceof EncounterPokemonRequirement)  {
+          qualified = qualified.filter(pkmn => req.queryParty(scene.getParty()).includes(pkmn));
+        }
+      } else {
+        this.protagonistPokemon = null;
+        console.log("marking null");
+        return false;
+      }
+    }
+    this.protagonistPokemon = qualified[Utils.randSeedInt(qualified.length, 0)];
+    return true;
+  }
+
+  meetsSupportingRequirementAndSupportingPokemonSelected?(scene: BattleScene) {
+    if (!this.supportPokemonRequirements) {
+      return true;
+    }
+
+    let qualified:PlayerPokemon[] = scene.getParty();
+    for (const req of this.supportPokemonRequirements) {
+      if (req.meetsRequirement(scene)) {
+        if (req instanceof EncounterPokemonRequirement)  {
+          qualified = qualified.filter(pkmn => req.queryParty(scene.getParty()).includes(pkmn));
+        }
+      } else {
+        this.supportingPokemon = [];
+        return false;
+      }
+    }
+    // filter out protag?
+    //qualified = qualified.filter(q => this.protagonistPokemon? q !== this.protagonistPokemon: true)
+    this.supportingPokemon = qualified;
+    return true;
+  }
+
   /**
    * Initializes encounter intro sprites based on the sprite configs defined in spriteConfigs
    * @param scene
@@ -233,19 +276,22 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
    * @param requirement
    * @returns
    */
-  withSceneRequirement(requirement: EncounterRequirement): this & Required<Pick<MysteryEncounter, "requirements">> {
+  withSceneRequirement(requirement: EncounterSceneRequirement): this & Required<Pick<MysteryEncounter, "requirements">> {
+    if (requirement instanceof EncounterPokemonRequirement) {
+      Error("Incorrectly added pokemon requirement as scene requirement.");
+    }
     this.requirements.push(requirement);
     return Object.assign(this, { requirements: this.requirements });
   }
 
   withProtagonistPokemonRequirement(requirement: EncounterPokemonRequirement): this & Required<Pick<MysteryEncounter, "protagonistPokemonRequirements">> {
     this.protagonistPokemonRequirements.push(requirement);
-    return Object.assign(this, { protagonistPokemonRequirements: this.requirements });
+    return Object.assign(this, { protagonistPokemonRequirements: this.protagonistPokemonRequirements });
   }
 
   withSupportPokemonRequirement(requirement: EncounterPokemonRequirement): this & Required<Pick<MysteryEncounter, "supportPokemonRequirements">> {
     this.supportPokemonRequirements.push(requirement);
-    return Object.assign(this, { supportPokemonRequirements: this.requirements });
+    return Object.assign(this, { supportPokemonRequirements: this.supportPokemonRequirements });
   }
 
 

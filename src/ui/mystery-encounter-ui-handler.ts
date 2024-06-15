@@ -300,6 +300,12 @@ export default class MysteryEncounterUiHandler extends UiHandler {
 
     // Options Window
     for (let i = 0; i < this.filteredEncounterOptions.length; i++) {
+      if (!this.filteredEncounterOptions[i].meetsRequirements(this.scene) ||
+      !this.filteredEncounterOptions[i].meetsProtagonistRequirementAndProtagonistPokemonSelected(this.scene) ||
+      !this.filteredEncounterOptions[i].meetsSupportingRequirementAndSupportingPokemonSelected(this.scene)) {
+        // TODO: This option should be disabled/greyed out or removed if requirements are not met
+        continue;
+      }
       let optionText;
       switch (this.filteredEncounterOptions.length) {
       case 2:
@@ -317,9 +323,7 @@ export default class MysteryEncounterUiHandler extends UiHandler {
         optionText.setText(text);
       }
 
-      if (!this.filteredEncounterOptions[i].meetsRequirements(this.scene)) {
-        // TODO: This option should be disabled/greyed out or removed if requirements are not met
-      }
+
       if (this.blockInput) {
         optionText.setAlpha(0.5);
       }
