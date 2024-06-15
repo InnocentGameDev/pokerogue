@@ -5,9 +5,10 @@ import MysteryEncounterDialogue, {
   allMysteryEncounterDialogue
 } from "./mystery-encounters/dialogue/mystery-encounter-dialogue";
 import MysteryEncounterOption from "./mystery-encounter-option";
-import { EncounterRequirement } from "./mystery-encounter-requirements";
+import { EncounterPokemonRequirement, EncounterRequirement } from "./mystery-encounter-requirements";
 import * as Utils from "../utils";
 import {EnemyPartyConfig} from "#app/utils/mystery-encounter-utils";
+import { PlayerPokemon } from "#app/field/pokemon";
 
 export enum MysteryEncounterVariant {
   DEFAULT,
@@ -37,6 +38,10 @@ export default interface MysteryEncounter {
    */
   encounterTier?: MysteryEncounterTier;
   requirements?: EncounterRequirement[];
+  protagonistPokemonRequirements?: EncounterPokemonRequirement[];
+  supportPokemonRequirements ?: EncounterPokemonRequirement[];
+  protagonistPokemon?: PlayerPokemon;
+  supportingPokemon?: PlayerPokemon[];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
 
@@ -134,7 +139,7 @@ export default class MysteryEncounter implements MysteryEncounter {
    * @returns
    */
   meetsRequirements?(scene: BattleScene) {
-    return !this.requirements.some(requirement => !requirement.partyQuery(scene));
+    return !this.requirements.some(requirement => !requirement.meetsRequirement(scene));
   }
 
   /**
@@ -154,6 +159,8 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
   dialogue?: MysteryEncounterDialogue;
   encounterTier?: MysteryEncounterTier;
   requirements?: EncounterRequirement[] = [];
+  protagonistPokemonRequirements?: EncounterPokemonRequirement[] = [];
+  supportPokemonRequirements ?: EncounterPokemonRequirement[] = [];
   dialogueTokens?: [RegExp, string][];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
@@ -226,10 +233,23 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
    * @param requirement
    * @returns
    */
-  withRequirement(requirement: EncounterRequirement): this & Required<Pick<MysteryEncounter, "requirements">> {
+  withSceneRequirement(requirement: EncounterRequirement): this & Required<Pick<MysteryEncounter, "requirements">> {
     this.requirements.push(requirement);
     return Object.assign(this, { requirements: this.requirements });
   }
+
+  withProtagonistPokemonRequirement(requirement: EncounterPokemonRequirement): this & Required<Pick<MysteryEncounter, "protagonistPokemonRequirements">> {
+    this.protagonistPokemonRequirements.push(requirement);
+    return Object.assign(this, { protagonistPokemonRequirements: this.requirements });
+  }
+
+  withSupportPokemonRequirement(requirement: EncounterPokemonRequirement): this & Required<Pick<MysteryEncounter, "supportPokemonRequirements">> {
+    this.supportPokemonRequirements.push(requirement);
+    return Object.assign(this, { supportPokemonRequirements: this.requirements });
+  }
+
+
+  //TODO: Split this into withSceneRequirement and withProtagonistPokemonRequirement and withSupportingPokemonRequirement
 
   /**
    * Can set custom encounter rewards via this callback function
