@@ -2510,13 +2510,11 @@ export default class BattleScene extends SceneBase {
     const biomeMysteryEncounters = mysteryEncountersByBiome.get(this.arena.biomeType);
     // Loading override or session encounter
     let encounter: MysteryEncounter;
-    /*
     if (!Utils.isNullOrUndefined(Overrides.MYSTERY_ENCOUNTER_OVERRIDE) && Overrides.MYSTERY_ENCOUNTER_OVERRIDE < biomeMysteryEncounters.length) {
       encounter = biomeMysteryEncounters[Overrides.MYSTERY_ENCOUNTER_OVERRIDE];
     } else {
       encounter = override?.encounterType >= 0 ? biomeMysteryEncounters[override?.encounterType] : null;
     }
-    */
     console.log(encounter);
     // Generate new encounter if no overrides
     if (!encounter) {
