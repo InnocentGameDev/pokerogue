@@ -40,7 +40,7 @@ export default interface MysteryEncounter {
   requirements?: EncounterSceneRequirement[];
   protagonistPokemonRequirements?: EncounterPokemonRequirement[];
   supportPokemonRequirements ?: EncounterPokemonRequirement[];
-  excludeProtagonistFromSupportRequirement: boolean;
+  excludeProtagonistFromSupportRequirement?: boolean;
   protagonistPokemon?: PlayerPokemon;
   supportingPokemon?: PlayerPokemon[];
   doEncounterRewards?: (scene: BattleScene) => boolean;
@@ -233,7 +233,7 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
   requirements?: EncounterRequirement[] = [];
   protagonistPokemonRequirements?: EncounterPokemonRequirement[] = [];
   supportPokemonRequirements ?: EncounterPokemonRequirement[] = [];
-  excludeProtagonistFromSupportRequirements: boolean;
+  excludeProtagonistFromSupportRequirements?: boolean;
   dialogueTokens?: [RegExp, string][];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
