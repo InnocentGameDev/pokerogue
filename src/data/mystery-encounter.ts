@@ -40,6 +40,7 @@ export default interface MysteryEncounter {
   requirements?: EncounterSceneRequirement[];
   protagonistPokemonRequirements?: EncounterPokemonRequirement[];
   supportPokemonRequirements ?: EncounterPokemonRequirement[];
+  excludeProtagonistFromSupportRequirement: boolean;
   protagonistPokemon?: PlayerPokemon;
   supportingPokemon?: PlayerPokemon[];
   doEncounterRewards?: (scene: BattleScene) => boolean;
@@ -155,12 +156,39 @@ export default class MysteryEncounter implements MysteryEncounter {
         }
       } else {
         this.protagonistPokemon = null;
-        console.log("marking null");
         return false;
       }
     }
-    this.protagonistPokemon = qualified[Utils.randSeedInt(qualified.length, 0)];
-    return true;
+    if (this.excludeProtagonistFromSupportRequirement && this.supportingPokemon) {
+      const trueProtagonistPool = [];
+      const overlap = [];
+      for (const qp of qualified) {
+        if (!this.supportingPokemon.includes(qp)) {
+          trueProtagonistPool.push(qp);
+        } else {
+          overlap.push(qp);
+        }
+
+      }
+      if (trueProtagonistPool.length > 0) {
+        // always choose from the non-overlapping pokemon first
+        this.protagonistPokemon =  trueProtagonistPool[Utils.randSeedInt(trueProtagonistPool.length, 0)];
+        return true;
+      } else {
+        // if there are multiple overlapping pokemon, we're okay - just choose one and take it out of the supporting pokemon pool
+        if (overlap.length > 1) {
+          this.protagonistPokemon = overlap[Utils.randSeedInt(overlap.length, 0)];
+          this.supportingPokemon = this.supportingPokemon.filter((supp)=> supp !== this.protagonistPokemon);
+          return true;
+        }
+        console.log("Mystery Encounter Edge Case: Requirement not met due to protagonist pokemon overlapping with support pokemon. There's no valid protagonist pokemon left.");
+        return false;
+      }
+    } else {
+      // this means we CAN have the same pokemon be a protagonist and supporting pokemon, so just choose any qualifying one randomly.
+      this.protagonistPokemon = qualified[Utils.randSeedInt(qualified.length, 0)];
+      return true;
+    }
   }
 
   meetsSupportingRequirementAndSupportingPokemonSelected?(scene: BattleScene) {
@@ -173,6 +201,7 @@ export default class MysteryEncounter implements MysteryEncounter {
       if (req.meetsRequirement(scene)) {
         if (req instanceof EncounterPokemonRequirement)  {
           qualified = qualified.filter(pkmn => req.queryParty(scene.getParty()).includes(pkmn));
+
         }
       } else {
         this.supportingPokemon = [];
@@ -204,6 +233,7 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
   requirements?: EncounterRequirement[] = [];
   protagonistPokemonRequirements?: EncounterPokemonRequirement[] = [];
   supportPokemonRequirements ?: EncounterPokemonRequirement[] = [];
+  excludeProtagonistFromSupportRequirements: boolean;
   dialogueTokens?: [RegExp, string][];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
@@ -289,9 +319,13 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
     return Object.assign(this, { protagonistPokemonRequirements: this.protagonistPokemonRequirements });
   }
 
-  withSupportPokemonRequirement(requirement: EncounterPokemonRequirement): this & Required<Pick<MysteryEncounter, "supportPokemonRequirements">> {
+  // TODO: Maybe add an optional parameter for excluding protagonist pokemon from the support cast?
+  // ex. if your only grass type pokemon, a snivy, is chosen as protagonist, if the support pokemon requires a grass type, the event won't trigger because
+  // it's already been
+  withSupportPokemonRequirement(requirement: EncounterPokemonRequirement, excludeProtagonistFromSupportRequirements:boolean = false): this & Required<Pick<MysteryEncounter, "supportPokemonRequirements">> {
     this.supportPokemonRequirements.push(requirement);
-    return Object.assign(this, { supportPokemonRequirements: this.supportPokemonRequirements });
+    this.excludeProtagonistFromSupportRequirements = excludeProtagonistFromSupportRequirements;
+    return Object.assign(this, { excludeProtagonistFromSupportRequirements: this.excludeProtagonistFromSupportRequirements, supportPokemonRequirements: this.supportPokemonRequirements });
   }
 
 

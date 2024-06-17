@@ -10,7 +10,7 @@ import { Nature } from "./nature";
 import { EvolutionItem, pokemonEvolutions } from "./pokemon-evolutions";
 import { FormChangeItem, SpeciesFormChangeItemTrigger, pokemonFormChanges } from "./pokemon-forms";
 import { SpeciesFormKey } from "./pokemon-species";
-import { Status } from "./status-effect";
+import { StatusEffect } from "./status-effect";
 import { Type } from "./type";
 import { WeatherType } from "./weather";
 
@@ -77,6 +77,7 @@ export class TimeOfDayRequirement extends EncounterSceneRequirement {
     if (timeOfDay instanceof Array) {
       this.requiredTimeOfDay = timeOfDay;
     } else {
+      this.requiredTimeOfDay = [];
       this.requiredTimeOfDay.push(timeOfDay);
     }
   }
@@ -99,6 +100,7 @@ export class WeatherRequirement extends EncounterSceneRequirement {
     if (weather instanceof Array) {
       this.requiredWeather = weather;
     } else {
+      this.requiredWeather = [];
       this.requiredWeather.push(weather);
     }
   }
@@ -144,6 +146,7 @@ export class PersistentModifierRequirement extends EncounterSceneRequirement {
     if (item instanceof Array) {
       this.requiredItems = item;
     } else {
+      this.requiredItems = [];
       this.requiredItems.push(item);
     }
   }
@@ -188,13 +191,14 @@ export class SpeciesRequirement extends EncounterPokemonRequirement {
     if (species instanceof Array) {
       this.requiredSpecies = species;
     } else {
+      this.requiredSpecies = [];
       this.requiredSpecies.push(species);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredSpecies?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredSpecies?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -223,13 +227,14 @@ export class NatureRequirement extends EncounterPokemonRequirement {
     if (nature instanceof Array) {
       this.requiredNature = nature;
     } else {
+      this.requiredNature = [];
       this.requiredNature.push(nature);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredNature?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredNature?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -257,13 +262,14 @@ export class TypeRequirement extends EncounterPokemonRequirement {
     if (type instanceof Array) {
       this.requiredType = type;
     } else {
+      this.requiredType = [];
       this.requiredType.push(type);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredType?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredType?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -292,13 +298,14 @@ export class MoveRequirement extends EncounterPokemonRequirement {
     if (moves instanceof Array) {
       this.requiredMoves = moves;
     } else {
+      this.requiredMoves = [];
       this.requiredMoves.push(moves);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredMoves?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredMoves?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -331,13 +338,14 @@ export class CanLearnMoveRequirement extends EncounterPokemonRequirement {
     if (learnableMove instanceof Array) {
       this.requiredMoves = learnableMove;
     } else {
+      this.requiredMoves = [];
       this.requiredMoves.push(learnableMove);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredMoves?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredMoves?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -366,13 +374,14 @@ export class EvolutionTargetSpeciesRequirement extends EncounterPokemonRequireme
     if (evolutionTargetSpecies instanceof Array) {
       this.requiredEvolutionTargetSpecies = evolutionTargetSpecies;
     } else {
+      this.requiredEvolutionTargetSpecies = [];
       this.requiredEvolutionTargetSpecies.push(evolutionTargetSpecies);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredEvolutionTargetSpecies?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredEvolutionTargetSpecies?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -401,13 +410,14 @@ export class AbilityRequirement extends EncounterPokemonRequirement {
     if (abilities instanceof Array) {
       this.requiredAbilities = abilities;
     } else {
+      this.requiredAbilities = [];
       this.requiredAbilities.push(abilities);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredAbilities?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredAbilities?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -423,36 +433,39 @@ export class AbilityRequirement extends EncounterPokemonRequirement {
   }
 }
 
-export class StatusRequirement extends EncounterPokemonRequirement {
-  requiredStatus: Status[];
+export class StatusEffectRequirement extends EncounterPokemonRequirement {
+  requiredStatusEffect: StatusEffect[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
 
-  constructor(status: Status | Status[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
+  constructor(StatusEffect: StatusEffect | StatusEffect[], minNumberOfPokemon: number = 1, invertQuery: boolean = false) {
     super();
     this.minNumberOfPokemon = minNumberOfPokemon;
     this.invertQuery = invertQuery;
-    if (status instanceof Array) {
-      this.requiredStatus = status;
+    if (StatusEffect instanceof Array) {
+      this.requiredStatusEffect = StatusEffect;
     } else {
-      this.requiredStatus.push(status);
+      this.requiredStatusEffect = [];
+      this.requiredStatusEffect.push(StatusEffect);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredStatus?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredStatusEffect?.length < 0) {
       return false;
     }
-    return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
+    const x = this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
+    console.log(x);
+    return x;
   }
 
   queryParty(partyPokemon: PlayerPokemon[]): PlayerPokemon[] {
     if (!this.invertQuery) {
-      return partyPokemon.filter((pokemon) => this.requiredStatus.filter((status) => pokemon.status === status).length > 0);
+      return partyPokemon.filter((pokemon) => this.requiredStatusEffect.filter((StatusEffect) => pokemon.status?.effect === StatusEffect).length > 0);
     } else {
-      // for an inverted query, we only want to get the pokemon that don't have ANY of the listed statuss
-      return partyPokemon.filter((pokemon) => this.requiredStatus.filter((status) => pokemon.status === status).length === 0);
+      // for an inverted query, we only want to get the pokemon that don't have ANY of the listed StatusEffects
+      return partyPokemon.filter((pokemon) => this.requiredStatusEffect.filter((StatusEffect) => pokemon.status?.effect === StatusEffect).length === 0);
     }
   }
 }
@@ -474,13 +487,14 @@ export class CanFormChangeWithItemRequirement extends EncounterPokemonRequiremen
     if (formChangeItem instanceof Array) {
       this.requiredFormChangeItem = formChangeItem;
     } else {
+      this.requiredFormChangeItem = [];
       this.requiredFormChangeItem.push(formChangeItem);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredFormChangeItem?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredFormChangeItem?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -522,13 +536,14 @@ export class CanEvolveWithItemRequirement extends EncounterPokemonRequirement {
     if (evolutionItems instanceof Array) {
       this.requiredEvolutionItem = evolutionItems;
     } else {
+      this.requiredEvolutionItem = [];
       this.requiredEvolutionItem.push(evolutionItems);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredEvolutionItem?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredEvolutionItem?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
@@ -567,13 +582,14 @@ export class HeldItemRequirement extends EncounterPokemonRequirement {
     if (heldItem instanceof Array) {
       this.requiredHeldItemModifier = heldItem;
     } else {
+      this.requiredHeldItemModifier = [];
       this.requiredHeldItemModifier.push(heldItem);
     }
   }
 
   meetsRequirement(scene: BattleScene): boolean {
     const partyPokemon = scene.getParty();
-    if (!isNullOrUndefined(partyPokemon) && this?.requiredHeldItemModifier?.length > 0) {
+    if (isNullOrUndefined(partyPokemon) || this?.requiredHeldItemModifier?.length < 0) {
       return false;
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;

@@ -66,6 +66,7 @@ import { ExpNotification } from "./enums/exp-notification";
 import MysteryEncounter, { MysteryEncounterTier, MysteryEncounterVariant } from "./data/mystery-encounter";
 import { MysteryEncounterFlags } from "./data/mystery-encounter-flags";
 import { mysteryEncountersByBiome } from "./data/mystery-encounters/mystery-encounters";
+import { MysteryEncounterType } from "./data/enums/mystery-encounter-type";
 
 export const bypassLogin = import.meta.env.VITE_BYPASS_LOGIN === "1";
 
@@ -2509,23 +2510,37 @@ export default class BattleScene extends SceneBase {
     const biomeMysteryEncounters = mysteryEncountersByBiome.get(this.arena.biomeType);
     // Loading override or session encounter
     let encounter: MysteryEncounter;
+    /*
     if (!Utils.isNullOrUndefined(Overrides.MYSTERY_ENCOUNTER_OVERRIDE) && Overrides.MYSTERY_ENCOUNTER_OVERRIDE < biomeMysteryEncounters.length) {
       encounter = biomeMysteryEncounters[Overrides.MYSTERY_ENCOUNTER_OVERRIDE];
     } else {
       encounter = override?.encounterType >= 0 ? biomeMysteryEncounters[override?.encounterType] : null;
     }
-
+    */
+    console.log(encounter);
     // Generate new encounter if no overrides
     if (!encounter) {
       const tierValue = Utils.randSeedInt(64);
       let tier = tierValue > 32 ? MysteryEncounterTier.COMMON : tierValue > 16 ? MysteryEncounterTier.UNCOMMON : tierValue > 6 ? MysteryEncounterTier.RARE : MysteryEncounterTier.SUPER_RARE;
       let availableEncounters = [];
-
+      for (encounter of biomeMysteryEncounters) {
+        console.log("-------" + MysteryEncounterType[encounter.encounterType] + " Encounter Check -------");
+        console.log(encounter);
+        console.log( "Encountercheck: " + encounter.meetsRequirements(this));
+        console.log( "protagCheck: " +  encounter.meetsProtagonistRequirementAndProtagonistPokemonSelected(this));
+        console.log( "supportCheck: " +  encounter.meetsSupportingRequirementAndSupportingPokemonSelected(this));
+        console.log(MysteryEncounterTier[encounter.encounterTier]);
+      }
       // If no valid encounters exist at tier, checks next tier down, continuing until there are some encounters available
       while (availableEncounters.length === 0 && tier >= 0) {
-        availableEncounters = biomeMysteryEncounters.filter((encounter) => encounter?.meetsRequirements(this) && encounter.encounterTier === tier);
+
+        availableEncounters = biomeMysteryEncounters.filter((encounter) => encounter?.meetsRequirements(this) &&
+        encounter.meetsSupportingRequirementAndSupportingPokemonSelected(this) && // support is checked first to handle cases of protagonist overlapping with support
+        encounter.meetsProtagonistRequirementAndProtagonistPokemonSelected(this) &&
+         encounter.encounterTier === tier);
         // while we're filtering we should also find and set the protagonist and supporting pokemon.
         // this will enable the mystery encounter writers to select the correct pokemon as necessary.
+        // probably split this up into an actual iterative loop in order to do the pokemon req logic and such.
 
         tier--;
       }
@@ -2536,6 +2551,7 @@ export default class BattleScene extends SceneBase {
       }
 
       encounter = availableEncounters[Utils.randSeedInt(availableEncounters.length)];
+      console.log(encounter);
     }
 
     // New encounter object to not dirty flags
