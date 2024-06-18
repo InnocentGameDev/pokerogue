@@ -1,7 +1,7 @@
 import { PlayerPokemon } from "#app/field/pokemon";
 import * as Utils from "../utils";
 import BattleScene from "../battle-scene";
-import { EncounterPokemonRequirement, EncounterRequirement, EncounterSceneRequirement } from "./mystery-encounter-requirements";
+import { EncounterPokemonRequirement, EncounterSceneRequirement } from "./mystery-encounter-requirements";
 
 export default interface MysteryEncounterOption {
   requirements?: EncounterSceneRequirement[];
@@ -69,7 +69,7 @@ export default class MysteryEncounterOption implements MysteryEncounterOption {
 }
 
 export class MysteryEncounterOptionBuilder implements Partial<MysteryEncounterOption> {
-  requirements?: EncounterRequirement[] = [];
+  requirements?: EncounterSceneRequirement[] = [];
   protagonistPokemonRequirements?: EncounterPokemonRequirement[] = [];
   supportPokemonRequirements ?: EncounterPokemonRequirement[] = [];
   onPreOptionPhase?: (scene: BattleScene) => void | boolean;

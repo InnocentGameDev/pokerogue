@@ -25,6 +25,7 @@ import {
 import * as Utils from "../utils";
 import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
 import {isNullOrUndefined} from "../utils";
+import { EncounterPokemonRequirement, EncounterSceneRequirement } from "#app/data/mystery-encounter-requirements";
 
 /**
  * Util file for functions used in mystery encounters
@@ -93,6 +94,26 @@ export function getRandomPlayerPokemon(scene: BattleScene, isAllowedInBattle: bo
   }
 
   return chosenPokemon;
+}
+
+export function getTokensFromScene(scene:BattleScene, reqs:EncounterSceneRequirement[]): Array<[RegExp, String]> {
+  const arr = [];
+  if (scene) {
+    for (const req of reqs) {
+      req.getMatchingDialogueToken(scene);
+    }
+  }
+  return arr;
+}
+
+export function getTokensFromPokemon(pokemon: PlayerPokemon, reqs:EncounterPokemonRequirement[], prefix:string) : Array<[RegExp, string]> {
+  const arr = [];
+  if (pokemon) {
+    for (const req of reqs) {
+      req.getMatchingDialogueToken(prefix, pokemon);
+    }
+  }
+  return arr;
 }
 
 /**

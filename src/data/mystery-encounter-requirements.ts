@@ -23,6 +23,10 @@ export abstract class EncounterSceneRequirement implements EncounterRequirement 
     throw new Error("Method not implemented.");
   }
 
+  getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
+    return [(/@/gi), ""];
+  }
+
 }
 
 export abstract class EncounterPokemonRequirement implements EncounterRequirement {
@@ -39,6 +43,12 @@ export abstract class EncounterPokemonRequirement implements EncounterRequiremen
   // Returns all party members that are compatible with this requirement. For non pokemon related requirements, the entire party is returned..
   queryParty(partyPokemon: PlayerPokemon[]) {
     return [];
+  }
+
+  // Doesn't require the "@ec" as prefix, just the string; populates the token with the attribute
+  // ex. @ec{protagonistSpecies} if strPrefix is simply "protagonist"
+  getMatchingDialogueToken(strPrefix:string, pokemon: PlayerPokemon): [RegExp, string] {
+    return [(/@/gi), ""];
   }
 
 }
@@ -63,9 +73,11 @@ export class WaveCountRequirement extends EncounterSceneRequirement {
         return false;
       }
     }
-
-
     return true;
+  }
+
+  getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
+    return [new RegExp("@ec\{waveCount\\}gi"), scene.currentBattle.waveIndex.toString()];
   }
 }
 
@@ -90,6 +102,10 @@ export class TimeOfDayRequirement extends EncounterSceneRequirement {
 
     return true;
   }
+
+  getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
+    return [new RegExp("@ec\{timeOfDay\\}gi"), TimeOfDay[scene.arena.getTimeOfDay()].toLocaleLowerCase()];
+  }
 }
 
 export class WeatherRequirement extends EncounterSceneRequirement {
@@ -113,7 +129,11 @@ export class WeatherRequirement extends EncounterSceneRequirement {
 
     return true;
   }
+  getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
+    return [new RegExp("@ec\{weather\\}gi"), WeatherType[scene.arena?.weather?.weatherType].replace("_", " ").toLocaleLowerCase()];
+  }
 }
+
 export class PartySizeRequirement extends EncounterSceneRequirement {
   partySizeRange: [number, number];
 
@@ -136,6 +156,10 @@ export class PartySizeRequirement extends EncounterSceneRequirement {
     }
 
     return true;
+  }
+
+  getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
+    return [new RegExp("@ec\{partySize\\}gi"), scene.getParty().length.toString()];
   }
 }
 
@@ -160,6 +184,17 @@ export class PersistentModifierRequirement extends EncounterSceneRequirement {
     }
     return true;
   }
+
+  getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
+    const requiredItemsInInventory = this.requiredItems.filter((a) => {
+      scene.modifiers.filter((itemInScene)  => itemInScene.type.id === a.id).length > 0;
+    });
+    if (requiredItemsInInventory.length > 0) {
+      return [new RegExp("@ec\{requiredItem\\}gi"), requiredItemsInInventory[0].name];
+    }
+    return null;
+  }
+
 }
 
 export class MoneyRequirement extends EncounterSceneRequirement {
@@ -176,6 +211,10 @@ export class MoneyRequirement extends EncounterSceneRequirement {
       return false;
     }
     return true;
+  }
+
+  getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
+    return [new RegExp("@ec\{money\\}gi"), "₽" + scene.money.toString()];
   }
 }
 
@@ -212,6 +251,14 @@ export class SpeciesRequirement extends EncounterPokemonRequirement {
       return partyPokemon.filter((pokemon) => this.requiredSpecies.filter((species) => pokemon.species.speciesId === species).length === 0);
     }
   }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    if (this.requiredSpecies.includes(pokemon.species.speciesId)) {
+      return [new RegExp("@ec\{" + str + "Species\\}gi"), Species[pokemon.species.speciesId]];
+    }
+    return null;
+  }
+
 }
 
 
@@ -248,6 +295,13 @@ export class NatureRequirement extends EncounterPokemonRequirement {
       return partyPokemon.filter((pokemon) => this.requiredNature.filter((nature) => pokemon.nature === nature).length === 0);
     }
   }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    if (this.requiredNature.includes(pokemon.nature)) {
+      return [new RegExp("@ec\{" + str + "Nature\\}gi"), Nature[pokemon.nature]];
+    }
+    return null;
+  }
 }
 
 export class TypeRequirement extends EncounterPokemonRequirement {
@@ -283,6 +337,15 @@ export class TypeRequirement extends EncounterPokemonRequirement {
       return partyPokemon.filter((pokemon) => this.requiredType.filter((type) => pokemon.getTypes().includes(type)).length === 0);
     }
   }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const includedTypes = this.requiredType.filter((ty) => pokemon.getTypes().includes(ty));
+    if (includedTypes.length > 0) {
+      return [new RegExp("@ec\{" + str + "Type\\}gi"), Type[includedTypes[0]]];
+    }
+    return null;
+  }
+
 }
 
 
@@ -319,6 +382,15 @@ export class MoveRequirement extends EncounterPokemonRequirement {
       return partyPokemon.filter((pokemon) => this.requiredMoves.filter((reqMove) => pokemon.moveset.filter((move) => move.moveId === reqMove).length === 0).length === 0);
     }
   }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const includedMoves = this.requiredMoves.filter((reqMove) => pokemon.moveset.filter((move) => move.moveId === reqMove).length > 0);
+    if (includedMoves.length > 0) {
+      return [new RegExp("@ec\{" + str + "Move\\}gi"), Moves[includedMoves[0]]];
+    }
+    return null;
+  }
+
 }
 
 /**
@@ -326,7 +398,7 @@ export class MoveRequirement extends EncounterPokemonRequirement {
  * NOTE: Egg moves are not included as learnable.
  * NOTE: If the Pokemon already knows the move, this requirement will fail, since it's not technically learnable.
  */
-export class CanLearnMoveRequirement extends EncounterPokemonRequirement {
+export class CompatibleMoveRequirement extends EncounterPokemonRequirement {
   requiredMoves: Moves[];
   minNumberOfPokemon:number;
   invertQuery:boolean;
@@ -358,6 +430,14 @@ export class CanLearnMoveRequirement extends EncounterPokemonRequirement {
       // for an inverted query, we only want to get the pokemon that don't have ANY of the listed learnableMoves
       return partyPokemon.filter((pokemon) => this.requiredMoves.filter((learnableMove) => pokemon.compatibleTms.filter(tm => !pokemon.moveset.find(m => m.moveId === tm)).includes(learnableMove)).length === 0);
     }
+  }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const includedCompatMoves = this.requiredMoves.filter((reqMove) => pokemon.compatibleTms.filter((tm) => !pokemon.moveset.find(m => m.moveId === tm)).includes(reqMove));
+    if (includedCompatMoves.length > 0) {
+      return [new RegExp("@ec\{" + str + "CompatibleMove\\}gi"), Moves[includedCompatMoves[0]]];
+    }
+    return null;
   }
 
 }
@@ -396,6 +476,14 @@ export class EvolutionTargetSpeciesRequirement extends EncounterPokemonRequireme
     }
   }
 
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const evos = this.requiredEvolutionTargetSpecies.filter((evolutionTargetSpecies) => pokemon.getEvolution().speciesId === evolutionTargetSpecies);
+    if (evos.length > 0) {
+      return [new RegExp("@ec\{" + str + "Evolution\\}gi"), Species[evos[0]]];
+    }
+    return null;
+  }
+
 }
 
 export class AbilityRequirement extends EncounterPokemonRequirement {
@@ -430,6 +518,16 @@ export class AbilityRequirement extends EncounterPokemonRequirement {
       // for an inverted query, we only want to get the pokemon that don't have ANY of the listed abilitiess
       return partyPokemon.filter((pokemon) => this.requiredAbilities.filter((abilities) => pokemon.hasAbility(abilities)).length === 0);
     }
+  }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const reqAbilities = this.requiredAbilities.filter((a) => {
+      pokemon.hasAbility(a);
+    });
+    if (reqAbilities.length > 0) {
+      return [new RegExp("@ec\{" + str + "Ability\\}gi"), Abilities[reqAbilities[0]]];
+    }
+    return null;
   }
 }
 
@@ -468,6 +566,17 @@ export class StatusEffectRequirement extends EncounterPokemonRequirement {
       return partyPokemon.filter((pokemon) => this.requiredStatusEffect.filter((StatusEffect) => pokemon.status?.effect === StatusEffect).length === 0);
     }
   }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const reqStatus = this.requiredStatusEffect.filter((a) => {
+      pokemon.status?.effect ===(a);
+    });
+    if (reqStatus.length > 0) {
+      return [new RegExp("@ec\{" + str + "Status\\}gi"), Abilities[reqStatus[0]]];
+    }
+    return null;
+  }
+
 }
 
 /**
@@ -499,27 +608,34 @@ export class CanFormChangeWithItemRequirement extends EncounterPokemonRequiremen
     }
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
   }
+  filterByForm(pokemon, formChangeItem)  {
+    if (pokemonFormChanges.hasOwnProperty(pokemon.species.speciesId)
+    // Get all form changes for this species with an item trigger, including any compound triggers
+    && pokemonFormChanges[pokemon.species.speciesId].filter(fc => fc.trigger.hasTriggerType(SpeciesFormChangeItemTrigger))
+    // Returns true if any form changes match this item
+      .map(fc => fc.findTrigger(SpeciesFormChangeItemTrigger) as SpeciesFormChangeItemTrigger)
+      .flat().flatMap(fc => fc.item).includes(formChangeItem))  {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   queryParty(partyPokemon: PlayerPokemon[]): PlayerPokemon[] {
-    const filterByForm = (pokemon, formChangeItem) =>  {
-      if (pokemonFormChanges.hasOwnProperty(pokemon.species.speciesId)
-      // Get all form changes for this species with an item trigger, including any compound triggers
-      && pokemonFormChanges[pokemon.species.speciesId].filter(fc => fc.trigger.hasTriggerType(SpeciesFormChangeItemTrigger))
-      // Returns true if any form changes match this item
-        .map(fc => fc.findTrigger(SpeciesFormChangeItemTrigger) as SpeciesFormChangeItemTrigger)
-        .flat().flatMap(fc => fc.item).includes(formChangeItem))  {
-        return true;
-      } else {
-        return false;
-      }
-    };
-
     if (!this.invertQuery) {
-      return partyPokemon.filter((pokemon) => this.requiredFormChangeItem.filter((formChangeItem) => filterByForm(pokemon, formChangeItem)).length > 0);
+      return partyPokemon.filter((pokemon) => this.requiredFormChangeItem.filter((formChangeItem) => this.filterByForm(pokemon, formChangeItem)).length > 0);
     } else {
       // for an inverted query, we only want to get the pokemon that don't have ANY of the listed formChangeItems
-      return partyPokemon.filter((pokemon) => this.requiredFormChangeItem.filter((formChangeItem) => filterByForm(pokemon, formChangeItem)).length === 0);
+      return partyPokemon.filter((pokemon) => this.requiredFormChangeItem.filter((formChangeItem) => this.filterByForm(pokemon, formChangeItem)).length === 0);
     }
+  }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const requiredItems = this.requiredFormChangeItem.filter((formChangeItem) => this.filterByForm(pokemon, formChangeItem));
+    if (requiredItems.length > 0) {
+      return [new RegExp("@ec\{" + str + "FormChangeItem\\}gi"), FormChangeItem[requiredItems[0]]];
+    }
+    return null;
   }
 
 }
@@ -549,24 +665,32 @@ export class CanEvolveWithItemRequirement extends EncounterPokemonRequirement {
     return this.queryParty(partyPokemon).length >= this.minNumberOfPokemon;
   }
 
-  queryParty(partyPokemon: PlayerPokemon[]): PlayerPokemon[] {
-    const filterByEvo = (pokemon, evolutionItem) =>  {
-      if (pokemonEvolutions.hasOwnProperty(pokemon.species.speciesId) && pokemonEvolutions[pokemon.species.speciesId].filter(e => e.item === evolutionItem
-        && (!e.condition || e.condition.predicate(pokemon))).length && (pokemon.getFormKey() !== SpeciesFormKey.GIGANTAMAX)) {
-        return true;
-      } else if (pokemon.isFusion() && pokemonEvolutions.hasOwnProperty(pokemon.fusionSpecies.speciesId) && pokemonEvolutions[pokemon.fusionSpecies.speciesId].filter(e => e.item === evolutionItem
-      && (!e.condition || e.condition.predicate(pokemon))).length && (pokemon.getFusionFormKey() !== SpeciesFormKey.GIGANTAMAX)) {
-        return true;
-      }
-      return false;
-    };
+  filterByEvo(pokemon, evolutionItem) {
+    if (pokemonEvolutions.hasOwnProperty(pokemon.species.speciesId) && pokemonEvolutions[pokemon.species.speciesId].filter(e => e.item === evolutionItem
+      && (!e.condition || e.condition.predicate(pokemon))).length && (pokemon.getFormKey() !== SpeciesFormKey.GIGANTAMAX)) {
+      return true;
+    } else if (pokemon.isFusion() && pokemonEvolutions.hasOwnProperty(pokemon.fusionSpecies.speciesId) && pokemonEvolutions[pokemon.fusionSpecies.speciesId].filter(e => e.item === evolutionItem
+    && (!e.condition || e.condition.predicate(pokemon))).length && (pokemon.getFusionFormKey() !== SpeciesFormKey.GIGANTAMAX)) {
+      return true;
+    }
+    return false;
+  }
 
+  queryParty(partyPokemon: PlayerPokemon[]): PlayerPokemon[] {
     if (!this.invertQuery) {
-      return partyPokemon.filter((pokemon) => this.requiredEvolutionItem.filter((evolutionItem) => filterByEvo(pokemon, evolutionItem)).length > 0);
+      return partyPokemon.filter((pokemon) => this.requiredEvolutionItem.filter((evolutionItem) => this.filterByEvo(pokemon, evolutionItem)).length > 0);
     } else {
       // for an inverted query, we only want to get the pokemon that don't have ANY of the listed evolutionItemss
-      return partyPokemon.filter((pokemon) => this.requiredEvolutionItem.filter((evolutionItems) => filterByEvo(pokemon, evolutionItems)).length === 0);
+      return partyPokemon.filter((pokemon) => this.requiredEvolutionItem.filter((evolutionItems) => this.filterByEvo(pokemon, evolutionItems)).length === 0);
     }
+  }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const requiredItems = this.requiredEvolutionItem.filter((evoItem) => this.filterByEvo(pokemon, evoItem));
+    if (requiredItems.length > 0) {
+      return [new RegExp("@ec\{" + str + "EvolutionItem\\}gi"), EvolutionItem[requiredItems[0]]];
+    }
+    return null;
   }
 }
 
@@ -602,6 +726,16 @@ export class HeldItemRequirement extends EncounterPokemonRequirement {
       // for an inverted query, we only want to get the pokemon that don't have ANY of the listed heldItems
       return partyPokemon.filter((pokemon) => this.requiredHeldItemModifier.filter((heldItem) => pokemon.getHeldItems().filter((it) => it.type.id === heldItem.id).length === 0).length === 0);
     }
+  }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    const requiredItems = this.requiredHeldItemModifier.filter((a) => {
+      pokemon.getHeldItems().filter((it) => it.type.id === a.id ).length > 0;
+    });
+    if (requiredItems.length > 0) {
+      return [new RegExp("@ec\{" + str + "HeldItem\\}gi"), requiredItems[0].name];
+    }
+    return null;
   }
 
 }
@@ -640,6 +774,9 @@ export class LevelRequirement extends EncounterPokemonRequirement {
       return partyPokemon.filter((pokemon) => pokemon.level < this.requiredLevelRange[0] || pokemon.level > this.requiredLevelRange[1]);
     }
   }
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    return [new RegExp("@ec\{" + str + "Level\\}gi"), pokemon.level.toString()];
+  }
 }
 
 export class FriendshipRequirement extends EncounterPokemonRequirement {
@@ -673,6 +810,10 @@ export class FriendshipRequirement extends EncounterPokemonRequirement {
       // for an inverted query, we only want to get the pokemon that don't have ANY of the listed requiredFriendshipRanges
       return partyPokemon.filter((pokemon) => pokemon.friendship < this.requiredFriendshipRange[0] || pokemon.friendship > this.requiredFriendshipRange[1]);
     }
+  }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    return [new RegExp("@ec\{" + str + "Friendship\\}gi"), pokemon.friendship.toString()];
   }
 }
 
@@ -713,6 +854,10 @@ export class HealthRatioRequirement extends EncounterPokemonRequirement {
       return partyPokemon.filter((pokemon) => pokemon.getHpRatio() < this.requiredHealthRange[0] || pokemon.getHpRatio() > this.requiredHealthRange[1]);
     }
   }
+
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    return [new RegExp("@ec\{" + str + "HealthRatio\\}gi"), Math.floor(pokemon.getHpRatio()*100).toString() + "%"];
+  }
 }
 
 export class WeightRequirement extends EncounterPokemonRequirement {
@@ -746,5 +891,8 @@ export class WeightRequirement extends EncounterPokemonRequirement {
       // for an inverted query, we only want to get the pokemon that don't have ANY of the listed requiredWeightRanges
       return partyPokemon.filter((pokemon) => pokemon.getWeight() < this.requiredWeightRange[0] || pokemon.getWeight() > this.requiredWeightRange[1]);
     }
+  }
+  getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
+    return [new RegExp("@ec\{" + str + "Weight\\}gi"), pokemon.getWeight().toString()];
   }
 }

@@ -2510,11 +2510,13 @@ export default class BattleScene extends SceneBase {
     const biomeMysteryEncounters = mysteryEncountersByBiome.get(this.arena.biomeType);
     // Loading override or session encounter
     let encounter: MysteryEncounter;
+    /*
     if (!Utils.isNullOrUndefined(Overrides.MYSTERY_ENCOUNTER_OVERRIDE) && Overrides.MYSTERY_ENCOUNTER_OVERRIDE < biomeMysteryEncounters.length) {
       encounter = biomeMysteryEncounters[Overrides.MYSTERY_ENCOUNTER_OVERRIDE];
     } else {
       encounter = override?.encounterType >= 0 ? biomeMysteryEncounters[override?.encounterType] : null;
     }
+    */
     console.log(encounter);
     // Generate new encounter if no overrides
     if (!encounter) {
@@ -2536,9 +2538,6 @@ export default class BattleScene extends SceneBase {
         encounter.meetsSupportingRequirementAndSupportingPokemonSelected(this) && // support is checked first to handle cases of protagonist overlapping with support
         encounter.meetsProtagonistRequirementAndProtagonistPokemonSelected(this) &&
          encounter.encounterTier === tier);
-        // while we're filtering we should also find and set the protagonist and supporting pokemon.
-        // this will enable the mystery encounter writers to select the correct pokemon as necessary.
-        // probably split this up into an actual iterative loop in order to do the pokemon req logic and such.
 
         tier--;
       }

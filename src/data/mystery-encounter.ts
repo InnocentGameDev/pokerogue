@@ -39,9 +39,13 @@ export default interface MysteryEncounter {
   encounterTier?: MysteryEncounterTier;
   requirements?: EncounterSceneRequirement[];
   protagonistPokemonRequirements?: EncounterPokemonRequirement[];
-  supportPokemonRequirements ?: EncounterPokemonRequirement[];
-  excludeProtagonistFromSupportRequirement?: boolean;
+  supportPokemonRequirements ?: EncounterPokemonRequirement[]; // A list of requirements that must ALL be met by a subset of pokemon to trigger the event
+  excludeProtagonistFromSupportRequirements?: boolean;
+  // Protagonist Pokemon is a single pokemon randomly selected from a set of pokemon that meet ALL protagonist pokemon requirements
   protagonistPokemon?: PlayerPokemon;
+  // Support Pokemon are pokemon that meet ALL support pokemon requirements.
+  // Note that an individual requirement may require multiple pokemon, but the resulting pokemon after all support requirements are met may be lower than expected
+  // If the protagonist pokemon and supporting pokemon are the same and ExcexcludeProtagonistFromSupportRequirements flag is true, protagonist pokemon may be promoted from support pool
   supportingPokemon?: PlayerPokemon[];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
@@ -159,7 +163,12 @@ export default class MysteryEncounter implements MysteryEncounter {
         return false;
       }
     }
-    if (this.excludeProtagonistFromSupportRequirement && this.supportingPokemon) {
+
+    if (qualified.length === 0) {
+      return false;
+    }
+
+    if (this.excludeProtagonistFromSupportRequirements && this.supportingPokemon) {
       const trueProtagonistPool = [];
       const overlap = [];
       for (const qp of qualified) {
@@ -176,7 +185,8 @@ export default class MysteryEncounter implements MysteryEncounter {
         return true;
       } else {
         // if there are multiple overlapping pokemon, we're okay - just choose one and take it out of the supporting pokemon pool
-        if (overlap.length > 1) {
+        if (overlap.length > 1 || (this.supportingPokemon.length - overlap.length >= 1)) {
+          // is this working?
           this.protagonistPokemon = overlap[Utils.randSeedInt(overlap.length, 0)];
           this.supportingPokemon = this.supportingPokemon.filter((supp)=> supp !== this.protagonistPokemon);
           return true;
@@ -193,6 +203,7 @@ export default class MysteryEncounter implements MysteryEncounter {
 
   meetsSupportingRequirementAndSupportingPokemonSelected?(scene: BattleScene) {
     if (!this.supportPokemonRequirements) {
+      this.supportingPokemon = [];
       return true;
     }
 
