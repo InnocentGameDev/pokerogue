@@ -5,7 +5,7 @@ import MysteryEncounterDialogue, {
   allMysteryEncounterDialogue
 } from "./mystery-encounters/dialogue/mystery-encounter-dialogue";
 import MysteryEncounterOption from "./mystery-encounter-option";
-import { EncounterPokemonRequirement, EncounterRequirement, EncounterSceneRequirement } from "./mystery-encounter-requirements";
+import { EncounterPokemonRequirement, EncounterSceneRequirement } from "./mystery-encounter-requirements";
 import * as Utils from "../utils";
 import {EnemyPartyConfig} from "#app/utils/mystery-encounter-utils";
 import { PlayerPokemon } from "#app/field/pokemon";
@@ -219,8 +219,6 @@ export default class MysteryEncounter implements MysteryEncounter {
         return false;
       }
     }
-    // filter out protag?
-    //qualified = qualified.filter(q => this.protagonistPokemon? q !== this.protagonistPokemon: true)
     this.supportingPokemon = qualified;
     return true;
   }
@@ -241,7 +239,7 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
 
   dialogue?: MysteryEncounterDialogue;
   encounterTier?: MysteryEncounterTier;
-  requirements?: EncounterRequirement[] = [];
+  requirements?: EncounterSceneRequirement[] = [];
   protagonistPokemonRequirements?: EncounterPokemonRequirement[] = [];
   supportPokemonRequirements ?: EncounterPokemonRequirement[] = [];
   excludeProtagonistFromSupportRequirements?: boolean;
