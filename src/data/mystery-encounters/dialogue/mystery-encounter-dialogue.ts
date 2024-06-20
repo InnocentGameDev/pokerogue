@@ -3,6 +3,7 @@ import {MysteriousChallengersDialogue} from "#app/data/mystery-encounters/dialog
 import {MysteriousChestDialogue} from "#app/data/mystery-encounters/dialogue/mysterious-chest-dialogue";
 import {DarkDealDialogue} from "#app/data/mystery-encounters/dialogue/dark-deal-dialogue";
 import {FightOrFlightDialogue} from "#app/data/mystery-encounters/dialogue/fight-or-flight-dialogue";
+import { SleepingSnorlaxDialogue } from "./sleeping-snorlax-dialogue";
 
 export class TextDisplay {
   speaker?: TemplateStringsArray | `mysteryEncounter:${string}`;
@@ -85,4 +86,5 @@ export function initMysteryEncounterDialogue() {
   allMysteryEncounterDialogue[MysteryEncounterType.MYSTERIOUS_CHEST] = MysteriousChestDialogue;
   allMysteryEncounterDialogue[MysteryEncounterType.DARK_DEAL] = DarkDealDialogue;
   allMysteryEncounterDialogue[MysteryEncounterType.FIGHT_OR_FLIGHT] = FightOrFlightDialogue;
+  allMysteryEncounterDialogue[MysteryEncounterType.SLEEPING_SNORLAX] = SleepingSnorlaxDialogue;
 }

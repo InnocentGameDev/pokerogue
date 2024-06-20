@@ -4,6 +4,7 @@ import {MysteriousChallengersEncounter} from "./mysterious-challengers";
 import {MysteriousChestEncounter} from "./mysterious-chest";
 import {FightOrFlightEncounter} from "#app/data/mystery-encounters/fight-or-flight";
 import { Biome } from "../enums/biome";
+import { SleepingSnorlaxEncounter } from "./sleeping-snorlax";
 
 
 // Only add your MysterEncounter here if you want it to be in every biome.
@@ -14,7 +15,8 @@ export function initMysteryEncounters() {
       MysteriousChallengersEncounter,
       MysteriousChestEncounter,
       DarkDealEncounter,
-      FightOrFlightEncounter
+      FightOrFlightEncounter,
+      SleepingSnorlaxEncounter
     );
   }
 }

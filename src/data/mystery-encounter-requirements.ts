@@ -77,7 +77,7 @@ export class WaveCountRequirement extends EncounterSceneRequirement {
   }
 
   getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
-    return [new RegExp("@ec\{waveCount\\}gi"), scene.currentBattle.waveIndex.toString()];
+    return [new RegExp("@ec\{waveCount\\}", "gi"), scene.currentBattle.waveIndex.toString()];
   }
 }
 
@@ -104,7 +104,7 @@ export class TimeOfDayRequirement extends EncounterSceneRequirement {
   }
 
   getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
-    return [new RegExp("@ec\{timeOfDay\\}gi"), TimeOfDay[scene.arena.getTimeOfDay()].toLocaleLowerCase()];
+    return [new RegExp("@ec\{timeOfDay\\}", "gi"), TimeOfDay[scene.arena.getTimeOfDay()].toLocaleLowerCase()];
   }
 }
 
@@ -130,7 +130,7 @@ export class WeatherRequirement extends EncounterSceneRequirement {
     return true;
   }
   getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
-    return [new RegExp("@ec\{weather\\}gi"), WeatherType[scene.arena?.weather?.weatherType].replace("_", " ").toLocaleLowerCase()];
+    return [new RegExp("@ec\{weather\\}", "gi"), WeatherType[scene.arena?.weather?.weatherType].replace("_", " ").toLocaleLowerCase()];
   }
 }
 
@@ -159,7 +159,7 @@ export class PartySizeRequirement extends EncounterSceneRequirement {
   }
 
   getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
-    return [new RegExp("@ec\{partySize\\}gi"), scene.getParty().length.toString()];
+    return [new RegExp("@ec\{partySize\\}", "gi"), scene.getParty().length.toString()];
   }
 }
 
@@ -190,7 +190,7 @@ export class PersistentModifierRequirement extends EncounterSceneRequirement {
       scene.modifiers.filter((itemInScene)  => itemInScene.type.id === a.id).length > 0;
     });
     if (requiredItemsInInventory.length > 0) {
-      return [new RegExp("@ec\{requiredItem\\}gi"), requiredItemsInInventory[0].name];
+      return [new RegExp("@ec\{requiredItem\\}", "gi"), requiredItemsInInventory[0].name];
     }
     return null;
   }
@@ -214,7 +214,7 @@ export class MoneyRequirement extends EncounterSceneRequirement {
   }
 
   getMatchingDialogueToken(scene:BattleScene): [RegExp, string] {
-    return [new RegExp("@ec\{money\\}gi"), "₽" + scene.money.toString()];
+    return [new RegExp("@ec\{money\\}", "gi"), "₽" + scene.money.toString()];
   }
 }
 
@@ -254,7 +254,7 @@ export class SpeciesRequirement extends EncounterPokemonRequirement {
 
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
     if (this.requiredSpecies.includes(pokemon.species.speciesId)) {
-      return [new RegExp("@ec\{" + str + "Species\\}gi"), Species[pokemon.species.speciesId]];
+      return [new RegExp("@ec\{" + str + "Species\\}", "gi"), Species[pokemon.species.speciesId]];
     }
     return null;
   }
@@ -298,7 +298,7 @@ export class NatureRequirement extends EncounterPokemonRequirement {
 
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
     if (this.requiredNature.includes(pokemon.nature)) {
-      return [new RegExp("@ec\{" + str + "Nature\\}gi"), Nature[pokemon.nature]];
+      return [new RegExp("@ec\{" + str + "Nature\\}", "gi"), Nature[pokemon.nature]];
     }
     return null;
   }
@@ -341,7 +341,7 @@ export class TypeRequirement extends EncounterPokemonRequirement {
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
     const includedTypes = this.requiredType.filter((ty) => pokemon.getTypes().includes(ty));
     if (includedTypes.length > 0) {
-      return [new RegExp("@ec\{" + str + "Type\\}gi"), Type[includedTypes[0]]];
+      return [new RegExp("@ec\{" + str + "Type\\}", "gi"), Type[includedTypes[0]]];
     }
     return null;
   }
@@ -386,7 +386,7 @@ export class MoveRequirement extends EncounterPokemonRequirement {
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
     const includedMoves = this.requiredMoves.filter((reqMove) => pokemon.moveset.filter((move) => move.moveId === reqMove).length > 0);
     if (includedMoves.length > 0) {
-      return [new RegExp("@ec\{" + str + "Move\\}gi"), Moves[includedMoves[0]]];
+      return [new RegExp("@ec\{" + str + "Move\\}", "gi"), Moves[includedMoves[0]].replace("_", " ")];
     }
     return null;
   }
@@ -435,7 +435,7 @@ export class CompatibleMoveRequirement extends EncounterPokemonRequirement {
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
     const includedCompatMoves = this.requiredMoves.filter((reqMove) => pokemon.compatibleTms.filter((tm) => !pokemon.moveset.find(m => m.moveId === tm)).includes(reqMove));
     if (includedCompatMoves.length > 0) {
-      return [new RegExp("@ec\{" + str + "CompatibleMove\\}gi"), Moves[includedCompatMoves[0]]];
+      return [new RegExp("@ec\{" + str + "CompatibleMove\\}", "gi"), Moves[includedCompatMoves[0]]];
     }
     return null;
   }
@@ -469,17 +469,17 @@ export class EvolutionTargetSpeciesRequirement extends EncounterPokemonRequireme
 
   queryParty(partyPokemon: PlayerPokemon[]): PlayerPokemon[] {
     if (!this.invertQuery) {
-      return partyPokemon.filter((pokemon) => this.requiredEvolutionTargetSpecies.filter((evolutionTargetSpecies) => pokemon.getEvolution().speciesId === evolutionTargetSpecies).length > 0);
+      return partyPokemon.filter((pokemon) => this.requiredEvolutionTargetSpecies.filter((evolutionTargetSpecies) => pokemon.getEvolution()?.speciesId === evolutionTargetSpecies).length > 0);
     } else {
       // for an inverted query, we only want to get the pokemon that don't have ANY of the listed evolutionTargetSpeciess
-      return partyPokemon.filter((pokemon) => this.requiredEvolutionTargetSpecies.filter((evolutionTargetSpecies) => pokemon.getEvolution().speciesId === evolutionTargetSpecies).length === 0);
+      return partyPokemon.filter((pokemon) => this.requiredEvolutionTargetSpecies.filter((evolutionTargetSpecies) => pokemon.getEvolution()?.speciesId === evolutionTargetSpecies).length === 0);
     }
   }
 
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
     const evos = this.requiredEvolutionTargetSpecies.filter((evolutionTargetSpecies) => pokemon.getEvolution().speciesId === evolutionTargetSpecies);
     if (evos.length > 0) {
-      return [new RegExp("@ec\{" + str + "Evolution\\}gi"), Species[evos[0]]];
+      return [new RegExp("@ec\{" + str + "Evolution\\}", "gi"), Species[evos[0]]];
     }
     return null;
   }
@@ -525,7 +525,7 @@ export class AbilityRequirement extends EncounterPokemonRequirement {
       pokemon.hasAbility(a);
     });
     if (reqAbilities.length > 0) {
-      return [new RegExp("@ec\{" + str + "Ability\\}gi"), Abilities[reqAbilities[0]]];
+      return [new RegExp("@ec\{" + str + "Ability\\}", "gi"), Abilities[reqAbilities[0]]];
     }
     return null;
   }
@@ -572,7 +572,7 @@ export class StatusEffectRequirement extends EncounterPokemonRequirement {
       pokemon.status?.effect ===(a);
     });
     if (reqStatus.length > 0) {
-      return [new RegExp("@ec\{" + str + "Status\\}gi"), Abilities[reqStatus[0]]];
+      return [new RegExp("@ec\{" + str + "Status\\}", "gi"), Abilities[reqStatus[0]]];
     }
     return null;
   }
@@ -633,7 +633,7 @@ export class CanFormChangeWithItemRequirement extends EncounterPokemonRequiremen
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
     const requiredItems = this.requiredFormChangeItem.filter((formChangeItem) => this.filterByForm(pokemon, formChangeItem));
     if (requiredItems.length > 0) {
-      return [new RegExp("@ec\{" + str + "FormChangeItem\\}gi"), FormChangeItem[requiredItems[0]]];
+      return [new RegExp("@ec\{" + str + "FormChangeItem\\}", "gi"), FormChangeItem[requiredItems[0]]];
     }
     return null;
   }
@@ -688,7 +688,7 @@ export class CanEvolveWithItemRequirement extends EncounterPokemonRequirement {
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
     const requiredItems = this.requiredEvolutionItem.filter((evoItem) => this.filterByEvo(pokemon, evoItem));
     if (requiredItems.length > 0) {
-      return [new RegExp("@ec\{" + str + "EvolutionItem\\}gi"), EvolutionItem[requiredItems[0]]];
+      return [new RegExp("@ec\{" + str + "EvolutionItem\\}", "gi"), EvolutionItem[requiredItems[0]]];
     }
     return null;
   }
@@ -733,7 +733,7 @@ export class HeldItemRequirement extends EncounterPokemonRequirement {
       pokemon.getHeldItems().filter((it) => it.type.id === a.id ).length > 0;
     });
     if (requiredItems.length > 0) {
-      return [new RegExp("@ec\{" + str + "HeldItem\\}gi"), requiredItems[0].name];
+      return [new RegExp("@ec\{" + str + "HeldItem\\}", "gi"), requiredItems[0].name];
     }
     return null;
   }
@@ -775,7 +775,7 @@ export class LevelRequirement extends EncounterPokemonRequirement {
     }
   }
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
-    return [new RegExp("@ec\{" + str + "Level\\}gi"), pokemon.level.toString()];
+    return [new RegExp("@ec\{" + str + "Level\\}", "gi"), pokemon.level.toString()];
   }
 }
 
@@ -813,7 +813,7 @@ export class FriendshipRequirement extends EncounterPokemonRequirement {
   }
 
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
-    return [new RegExp("@ec\{" + str + "Friendship\\}gi"), pokemon.friendship.toString()];
+    return [new RegExp("@ec\{" + str + "Friendship\\}", "gi"), pokemon.friendship.toString()];
   }
 }
 
@@ -856,7 +856,7 @@ export class HealthRatioRequirement extends EncounterPokemonRequirement {
   }
 
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
-    return [new RegExp("@ec\{" + str + "HealthRatio\\}gi"), Math.floor(pokemon.getHpRatio()*100).toString() + "%"];
+    return [new RegExp("@ec\{" + str + "HealthRatio\\}", "gi"), Math.floor(pokemon.getHpRatio()*100).toString() + "%"];
   }
 }
 
@@ -893,6 +893,6 @@ export class WeightRequirement extends EncounterPokemonRequirement {
     }
   }
   getMatchingDialogueToken(str:string, pokemon: PlayerPokemon): [RegExp, string] {
-    return [new RegExp("@ec\{" + str + "Weight\\}gi"), pokemon.getWeight().toString()];
+    return [new RegExp("@ec\{" + str + "Weight\\}", "gi"), pokemon.getWeight().toString()];
   }
 }

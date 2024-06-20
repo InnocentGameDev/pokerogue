@@ -149,6 +149,10 @@ export default class MysteryEncounter implements MysteryEncounter {
 
   meetsProtagonistRequirementAndProtagonistPokemonSelected?(scene: BattleScene) {
     if (!this.protagonistPokemonRequirements) {
+      const activeMon = scene.getParty().filter(p => p.isActive());
+      if (activeMon.length > 0) {
+        this.protagonistPokemon =  activeMon[0];
+      }
       return true;
     }
     let qualified:PlayerPokemon[] = scene.getParty();
