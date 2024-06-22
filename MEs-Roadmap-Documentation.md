@@ -1,4 +1,4 @@
-# 📝 Most immediate things on the to-do platter
+# 📝 Most immediate things to-do list
 
 - ### High priority
     - 🐛 Picking up certain items in Fight or Flight is still broken. Workaround is leave encounter.
@@ -8,16 +8,17 @@
     
     - 🐛 Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app
     - 🐛 Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
-    - ⚙️ "Steal from player" functionality (Gholdengo ME) 🛠️
     - ⚙️ "Omniboost" functionality (Fight or Flight ME) 🛠️
     - ⚙️ Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs 🛠️
       - ⚙️ Hardcode that the same ME can't happen twice in a row -- boring and sometimes too rough 🛠️
-    - ⚙️ Push Dark Deal ME to a higher wave requirement (+30) as it seems to be functioning (mostly) bugless. 🛠️
 
 - ### Low priority
-    - 🐛 Mysterious Challengers can spawn two trainers of the same type
+    - 🐛 Mysterious Challengers can spawn two trainers (or three) of the same type
+    - 🐛 Tooltip bug in Events. When showing the tooltip of the 2nd or later Event you've found, the tooltip for the first option will match whatever option you selected in the previous Event. This wrong tooltip gets overriden once you move the cursor.
+      - Example: if you chose the hardest battle in Mysterious Challenger, and then roll into a 'Fight or Flight' Event, the option 'Fight' will show 'Brutal Battle, Great Reward'.
     - ⚖️ Lower waves "Fight of Flight" mons are sometimes too easy -- lvl 3 Wurmple at floor 4. Lvl 8 Combee at floor 11.
         - Sometimes they can be pretty ridiculous (lvl 18 boss early into biome 2)
+        - Note: Levels have been tweaked recently, so further test is needed
 
 
 # 📝 Things to be done before Mystery Encounters ("MEs/Events") MVP is finished:
@@ -25,11 +26,11 @@
 
 - ## Bugless implementation of the MVP MEs
   - Establish placeholder waves for MEs to happen ✔️
-  - Bug-ish implementation of Common ME 1 ✔️
-  - Bug-ish implementation of Common ME 2 ✔️
-  - Bug-ish implementation of Rare ME 1 ✔️
-  - Bug-ish implementation of Epic ME 1 🛠️
-  - Bug-ish implementation of Legendary ME 1 ✔️
+  - Bug-ish implementation of Common ME 1 ('Mysterious Chest')✔️
+  - Bug-ish implementation of Common ME 2 ('Fight or Flight')✔️
+  - Bug-ish implementation of Rare ME 1 ('Mysterious Challenger')✔️
+  - Bug-ish implementation of Rare ME 2 ('Sleeping Snorlax') 🛠️
+  - Bug-ish implementation of Legendary ME 1 ('Dark Deal') ✔️
 
 - ## First round of playtesting (Alpha)
   - Establish a placeholder odd for MEs to happen closer to real implementation ❌
@@ -42,11 +43,11 @@
   - ES localisation 🛠️
 
 
-# 🧬 Deep dive into MEs and what has done so far
+# 🧬 Deep dive into Events and what has been done so far
 
-Mysterious Encounters aim to be an addition to PokeRogue that will fundamentally shift the way PokéRogue feels. It looks to improve the bet of the game into the RogueLite genre without touching the core gameplay loop of Pokémon battles/collection that we know and love already in this game. Below there are some specifications that clarify what's being worked on for ease of access for the devs, balance team, artists and others who may be interested. Beware of spoilers!
+Events (referred to as 'Mysterious Encounters, MEs' in the code) aim to be an addition to PokeRogue that will fundamentally shift the way PokéRogue feels. It looks to improve the bet of the game into the RogueLike genre without touching the core gameplay loop of Pokémon battles/collection that we know and love already in this game. Below there are some specifications that clarify what's being worked on for ease of access for the devs, balance team, artists and others who may be interested. Beware of spoilers!
 
-## A Mysterious Encounter __**always has**__:
+## An Event __**always has**__:
   ### #️⃣ A wave index where they're happening -- each ME takes up a whole wave (means you miss a combat!).
 
   ### 💬 Dialogue:
@@ -120,9 +121,9 @@ Mysterious Encounters aim to be an addition to PokeRogue that will fundamentally
     - 🐛 Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
 
   - ## 🟢 __**Non-game breaking**__
-    - 🐛 Scientist will remember the first PKMN it "did the thing on" and never ever forget it, even in future runs. Only affects dialogue.
-    - 
-
+    - Both of these bugs seem to have in common that they don't "forget" their last passed string:
+      - 🐛 Scientist will remember the first PKMN it "did the thing on" and never ever forget it, even in future runs. Only affects dialogue.
+      - 🐛 Tooltip bug in Events. When showing the tooltip of the 2nd or later Event you've found, the tooltip for the first option will match whatever option you selected in the previous Event. This wrong tooltip gets overriden once you move the cursor.
 
 # 🗿 Other cool things/functionalities that won't make it in the MVP but are planned to accomodate future MEs:
 
@@ -162,3 +163,4 @@ Mysterious Encounters aim to be an addition to PokeRogue that will fundamentally
 - The 🐛 "Picking a double battle trainer (ie Twins) as your challenge results in a game over, including loss of save." should be fixed.
 - Allowed catch in "Fight or Flight" -- it was counterintuitive to not allow it as it __is__ a wild PKMN fight.
 - More minor 🐛 squashed.
+- Pushed Dark Deal ME to a higher wave requirement (+30) as it seems to be functioning (mostly) bugless.
