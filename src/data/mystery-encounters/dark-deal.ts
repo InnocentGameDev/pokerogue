@@ -4,7 +4,6 @@ import { EnemyPartyConfig, initBattleWithEnemyConfig, getRandomSpeciesByEggTier,
 import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
 import {ModifierRewardPhase} from "#app/phases";
 import { getPokemonSpecies } from "../pokemon-species";
-import { Species } from "../enums/species";
 import { MysteryEncounterType } from "../enums/mystery-encounter-type";
 import { PokeballType } from "../pokeball";
 import { EggTier } from "../enums/egg-type";
@@ -20,8 +19,8 @@ export const DarkDealEncounter: MysteryEncounter = new MysteryEncounterBuilder()
       hasShadow: true
     },
     {
-      spriteKey: Species.PORYGON.toString(),
-      fileRoot: "pokemon",
+      spriteKey: "dark_deal_porygon",
+      fileRoot: "mystery-encounters",
       hasShadow: true,
       repeat: true
     }
