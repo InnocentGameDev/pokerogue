@@ -4,7 +4,7 @@ import { getHighestLevelPlayerPokemon, koPlayerPokemon, leaveEncounterWithoutBat
 import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
 import * as Utils from "../../utils";
 import { MysteryEncounterType } from "#enums/mystery-encounter-type";
-import { WaveCountRequirement } from "../mystery-encounter-requirements";
+import {WaveCountRequirement} from "../mystery-encounter-requirements";
 import { MysteryEncounterOptionBuilder } from "../mystery-encounter-option";
 import {GameOverPhase} from "#app/phases";
 import {Species} from "#enums/species";
@@ -24,8 +24,8 @@ export const MysteriousChestEncounter: MysteryEncounter = new MysteryEncounterBu
       // Open the chest
       const roll = Utils.randSeedInt(100);
       if (roll > 60) {
-        // Choose between 4 GREAT tier items (40%)
-        setEncounterRewards(scene, { guaranteedModifierTiers: [ModifierTier.GREAT, ModifierTier.GREAT, ModifierTier.GREAT, ModifierTier.GREAT]});
+        // Choose between 2 COMMON / 2 GREAT tier items (40%)
+        setEncounterRewards(scene, { guaranteedModifierTiers: [ModifierTier.COMMON, ModifierTier.COMMON, ModifierTier.GREAT, ModifierTier.GREAT]});
         // Display result message then proceed to rewards
         await showEncounterText(scene, "mysteryEncounter:mysterious_chest_option_1_normal_result")
           .then(() => leaveEncounterWithoutBattle(scene));
@@ -57,7 +57,7 @@ export const MysteriousChestEncounter: MysteryEncounter = new MysteryEncounterBu
         await showEncounterText(scene, "mysteryEncounter:mysterious_chest_option_1_bad_result")
           .then(() => {
             if (scene.getParty().filter(p => p.isAllowedInBattle()).length === 0) {
-              // Game over
+              // All pokemon fainted, game over
               scene.clearPhaseQueue();
               scene.unshiftPhase(new GameOverPhase(scene));
             } else {

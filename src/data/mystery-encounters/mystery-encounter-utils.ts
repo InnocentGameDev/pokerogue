@@ -30,6 +30,7 @@ import {isNullOrUndefined} from "../../utils";
 import {TrainerType} from "#enums/trainer-type";
 import {EggTier} from "#enums/egg-type";
 import {Species} from "#enums/species";
+import {Type} from "#app/data/type";
 
 /**
  * Util file for functions used in mystery encounters
@@ -198,9 +199,10 @@ export function showEncounterDialogue(scene: BattleScene, textContentKey: Templa
  * NOTE: This returns ANY random species, including those locked behind eggs, etc.
  * @param scene
  * @param tiers
+ * @param types
  * @returns
  */
-export function getRandomSpeciesByEggTier(scene: BattleScene, tiers: EggTier[]): Species {
+export function getRandomSpeciesByEggTier(scene: BattleScene, tiers: EggTier[], types?: Type[]): Species {
   let values: number[] = [];
   tiers.forEach((tier) => {
     switch (tier) {
@@ -222,10 +224,17 @@ export function getRandomSpeciesByEggTier(scene: BattleScene, tiers: EggTier[]):
   const min = values[0];
   const max = values[values.length - 1];
 
-  const filteredSpecies = Object.entries(speciesStarters)
+  let filteredSpecies = Object.entries(speciesStarters)
     .filter(s => s[1] >= min && s[1] <= max)
     .map(s => parseInt(s[0]))
     .filter(s => getPokemonSpecies(s));
+
+  if (!isNullOrUndefined(types) && types.length > 0) {
+    filteredSpecies = filteredSpecies.filter(s => {
+      const species = getPokemonSpecies(s);
+      return types.includes(species.type1) || types.includes(species.type2);
+    });
+  }
 
   const index = Utils.randSeedInt(filteredSpecies.length);
   return Phaser.Math.RND.shuffle(filteredSpecies)[index];

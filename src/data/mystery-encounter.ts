@@ -125,6 +125,7 @@ export default class MysteryEncounter implements MysteryEncounter {
     this.dialogueTokens = [];
     this.enemyPartyConfigs = [];
     this.introVisuals = null;
+    this.misc = null;
   }
 
   /**

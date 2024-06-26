@@ -1,10 +1,10 @@
-import { SimpleTranslationEntries } from "#app/plugins/i18n";
+import {SimpleTranslationEntries} from "#app/interfaces/locales";
 
 export const mysteryEncounter: SimpleTranslationEntries = {
 
   // Mysterious Encounters -- Common Tier
 
-  "mysterious_chest_intro_message": "You keep going and find...@d{64}\na chest?",
+  "mysterious_chest_intro_message": "You found...@d{32}\na chest?",
   "mysterious_chest_title": "The Mysterious Chest",
   "mysterious_chest_description": "A beautifully ornamented chest stands on the ground. There must be something good inside... right?",
   "mysterious_chest_query": "Will you open it?",
@@ -41,7 +41,7 @@ export const mysteryEncounter: SimpleTranslationEntries = {
 
   // Mysterious Encounters -- Legendary Tier
 
-  "dark_deal_intro_message": "A strange man in a tattered coat stands in your way...",
+  "dark_deal_intro_message": "A strange man in a tattered coat\nstands in your way...",
   "dark_deal_speaker": "Shady Guy",
   "dark_deal_intro_dialogue": `Hey, you!
     $I've been working on a new device\nto bring out a Pokémon's latent power!
@@ -51,19 +51,19 @@ export const mysteryEncounter: SimpleTranslationEntries = {
   "dark_deal_description": "The disturbing fellow holds up some Pokéballs.\n\"I'll make it worth your while! You can have these strong Pokéballs as payment, All I need is a Pokémon from your team! Hehe...\"",
   "dark_deal_query": "What will you do?",
   "dark_deal_option_1_label": "Accept", // Give player 10 rogue balls. Remove a random Pokémon from player's party. Fight a legendary Pokémon as a boss
-  "dark_deal_option_1_tooltip": "(+) 10 Rogue Balls\n(?) Enhance a Random Pokémon", // Give player 10 rogue balls. Remove a random Pokémon from player's party. Fight a legendary Pokémon as a boss
+  "dark_deal_option_1_tooltip": "(+) 5 Rogue Balls\n(?) Enhance a Random Pokémon", // Give player 10 rogue balls. Remove a random Pokémon from player's party. Fight a legendary Pokémon as a boss
   "dark_deal_option_2_label": "Refuse",
   "dark_deal_option_2_tooltip": "(-) No Rewards",
   "dark_deal_option_1_selected": `Let's see, that @ec{pokeName} will do nicely!
   $Remember, I'm not responsible\nif anything bad happens!@d{32} Hehe...`,
-  "dark_deal_option_1_selected_message": `The man hands you 10 Rogue Balls.
+  "dark_deal_option_1_selected_message": `The man hands you 5 Rogue Balls.
   $@ec{pokeName} hops into the strange machine...
   $Flashing lights and weird noises\nstart coming from the machine!
   $...@d{96} Something emerges\nfrom the device, raging wildly!`,
   "dark_deal_option_2_selected": "Not gonna help a poor fellow out?\nPah!",
   "dark_deal_outro": "After the harrowing encounter,\nyou collect yourself and depart.",
 
-  "fight_or_flight_intro_message": "Something shiny is sparkling on the ground near that Pokémon!",
+  "fight_or_flight_intro_message": "Something shiny is sparkling\non the ground near that Pokémon!",
   "fight_or_flight_title": "Fight or Flight",
   "fight_or_flight_description": "It looks like there's a strong Pokémon guarding an item. Fighting is the straightforward approach, but this Pokémon looks strong. You could also try to sneak around, but the Pokémon may catch you.",
   "fight_or_flight_query": "What will you do?",
