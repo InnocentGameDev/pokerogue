@@ -5,7 +5,6 @@
     - 🐛 Modifiers that are applied to pokemon get skipped in Fight or Flight.
 
 - ### Medium priority
-    
     - 🐛 Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app
     - 🐛 Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
     - ⚙️ "Omniboost" functionality (Fight or Flight ME) 🛠️
@@ -14,6 +13,7 @@
 
 - ### Low priority
     - 🐛 Mysterious Challengers can spawn two trainers (or three) of the same type
+    - 🐛 Fight or Flight intro visuals may show different gender from the actual spawned pokemon
     - 🐛 Tooltip bug in Events. When showing the tooltip of the 2nd or later Event you've found, the tooltip for the first option will match whatever option you selected in the previous Event. This wrong tooltip gets overriden once you move the cursor.
       - Example: if you chose the hardest battle in Mysterious Challenger, and then roll into a 'Fight or Flight' Event, the option 'Fight' will show 'Brutal Battle, Great Reward'.
     - ⚖️ Lower waves "Fight of Flight" mons are sometimes too easy -- lvl 3 Wurmple at floor 4. Lvl 8 Combee at floor 11.

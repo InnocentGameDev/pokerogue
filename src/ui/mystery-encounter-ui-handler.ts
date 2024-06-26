@@ -84,6 +84,7 @@ export default class MysteryEncounterUiHandler extends UiHandler {
         this.unblockInput();
       }, 1500);
     }
+    this.displayOptionTooltip();
 
     return true;
   }
@@ -194,7 +195,7 @@ export default class MysteryEncounterUiHandler extends UiHandler {
     case Button.LEFT:
       if (cursor === this.viewPartyIndex) {
         success = this.setCursor(1);
-      } else if (cursor !== 2) {
+      } else if (cursor === 1) {
         success = this.setCursor(cursor - 1);
       }
       break;
@@ -386,8 +387,6 @@ export default class MysteryEncounterUiHandler extends UiHandler {
         duration: 1000
       });
     }
-
-    this.displayOptionTooltip();
   }
 
   displayOptionTooltip() {

@@ -14,7 +14,12 @@ import {
   ModifierTypeFunc,
   regenerateModifierPoolThresholds
 } from "../../modifier/modifier-type";
-import {BattleEndPhase, EggLapsePhase, ModifierRewardPhase, TrainerVictoryPhase} from "../../phases";
+import {
+  BattleEndPhase,
+  EggLapsePhase,
+  ModifierRewardPhase,
+  TrainerVictoryPhase
+} from "../../phases";
 import {
   MysteryEncounterBattlePhase,
   MysteryEncounterRewardsPhase
@@ -251,10 +256,11 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
 
   const normalCount = partyConfig?.pokemonSpecies?.length || 0;
   const bossCount = partyConfig?.pokemonBosses?.length || 0;
+  let doubleBattle = partyConfig?.doubleBattle;
 
   // Trainer
   const trainerType = partyConfig?.trainerType;
-  const trainerConfig = partyConfig?.trainerConfig;
+  let trainerConfig = partyConfig?.trainerConfig;
   if (trainerType || trainerConfig) {
     scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.TRAINER_BATTLE;
     if (scene.currentBattle.trainer) {
@@ -262,9 +268,10 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
       scene.currentBattle.trainer.destroy();
     }
 
-    const trainerConfig = partyConfig?.trainerConfig ? partyConfig?.trainerConfig : trainerConfigs[trainerType];
+    trainerConfig = partyConfig?.trainerConfig ? partyConfig?.trainerConfig : trainerConfigs[trainerType];
 
     const doubleTrainer = trainerConfig.doubleOnly || (trainerConfig.hasDouble && partyConfig.doubleBattle);
+    doubleBattle = doubleTrainer;
     const trainerFemale = isNullOrUndefined(partyConfig.female) ? !!(Utils.randSeedInt(2)) : partyConfig.female;
     const newTrainer = new Trainer(scene, trainerConfig.trainerType, doubleTrainer ? TrainerVariant.DOUBLE : trainerFemale ? TrainerVariant.FEMALE : TrainerVariant.DEFAULT, null, null, null, trainerConfig);
     newTrainer.x += 300;
@@ -277,11 +284,12 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
   } else {
     // Wild
     scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.WILD_BATTLE;
-    battle.enemyLevels = new Array(normalCount + bossCount > 0 ? normalCount + bossCount : partyConfig?.doubleBattle ? 2 : 1).fill(null).map(() => scene.currentBattle.getLevelForWave());
+    battle.enemyLevels = new Array(normalCount + bossCount > 0 ? normalCount + bossCount : doubleBattle ? 2 : 1).fill(null).map(() => scene.currentBattle.getLevelForWave());
   }
 
   scene.getEnemyParty().forEach(enemyPokemon => enemyPokemon.destroy());
   battle.enemyParty = [];
+  battle.double = doubleBattle;
 
   // Adjust levels for battle by modifier
   // ME levels are modified by an additive that scales with wave index
@@ -321,7 +329,7 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
       enemyPokemon.setBoss(true, scene.getEncounterBossSegments(scene.currentBattle.waveIndex, level, enemySpecies, true));
     }
 
-    if (e < (partyConfig?.doubleBattle ? 2 : 1)) {
+    if (e < (doubleBattle ? 2 : 1)) {
       enemyPokemon.setX(-66 + enemyPokemon.getFieldPositionOffset()[0]);
       enemyPokemon.resetSummonData();
     }
@@ -339,7 +347,7 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
 
   await Promise.all(loadEnemyAssets);
   battle.enemyParty.forEach((enemyPokemon_2, e_1) => {
-    if (e_1 < (partyConfig?.doubleBattle ? 2 : 1)) {
+    if (e_1 < (doubleBattle ? 2 : 1)) {
       enemyPokemon_2.setVisible(false);
       if (battle.double) {
         enemyPokemon_2.setFieldPosition(e_1 ? FieldPosition.RIGHT : FieldPosition.LEFT);
