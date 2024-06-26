@@ -1,14 +1,14 @@
 import BattleScene from "../../battle-scene";
 import { AddPokeballModifierType } from "../../modifier/modifier-type";
-import { EnemyPartyConfig, initBattleWithEnemyConfig, getRandomSpeciesByEggTier, leaveEncounterWithoutBattle, getRandomPlayerPokemon } from "../../utils/mystery-encounter-utils";
+import { EnemyPartyConfig, initBattleWithEnemyConfig, getRandomSpeciesByEggTier, leaveEncounterWithoutBattle, getRandomPlayerPokemon } from "./mystery-encounter-utils";
 import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
 import {ModifierRewardPhase} from "#app/phases";
 import { getPokemonSpecies } from "../pokemon-species";
-import { MysteryEncounterType } from "../enums/mystery-encounter-type";
+import { MysteryEncounterType } from "#enums/mystery-encounter-type";
 import { PokeballType } from "../pokeball";
-import { EggTier } from "../enums/egg-type";
 import {PartySizeRequirement, WaveCountRequirement} from "../mystery-encounter-requirements";
 import { MysteryEncounterOptionBuilder } from "../mystery-encounter-option";
+import {EggTier} from "#enums/egg-type";
 
 export const DarkDealEncounter: MysteryEncounter = new MysteryEncounterBuilder()
   .withEncounterType(MysteryEncounterType.DARK_DEAL)

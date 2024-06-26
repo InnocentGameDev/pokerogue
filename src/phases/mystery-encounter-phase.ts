@@ -2,7 +2,7 @@ import i18next from "i18next";
 import BattleScene from "../battle-scene";
 import { Phase } from "../phase";
 import { Mode } from "../ui/ui";
-import { hideMysteryEncounterIntroVisuals } from "../utils/mystery-encounter-utils";
+import { hideMysteryEncounterIntroVisuals } from "../data/mystery-encounters/mystery-encounter-utils";
 import { CheckSwitchPhase, NewBattlePhase, PostSummonPhase, ReturnPhase, ScanIvsPhase, ShinySparklePhase, SummonPhase, ToggleDoublePositionPhase } from "../phases";
 import MysteryEncounterOption from "../data/mystery-encounter-option";
 import { MysteryEncounterVariant } from "../data/mystery-encounter";

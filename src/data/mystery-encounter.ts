@@ -1,13 +1,13 @@
 import BattleScene from "../battle-scene";
 import MysteryEncounterIntroVisuals, { MysteryEncounterSpriteConfig } from "../field/mystery-encounter-intro";
-import { MysteryEncounterType } from "./enums/mystery-encounter-type";
+import { MysteryEncounterType } from "#enums/mystery-encounter-type";
 import MysteryEncounterDialogue, {
   allMysteryEncounterDialogue
 } from "./mystery-encounters/dialogue/mystery-encounter-dialogue";
 import MysteryEncounterOption from "./mystery-encounter-option";
 import { EncounterRequirement } from "./mystery-encounter-requirements";
 import * as Utils from "../utils";
-import {EnemyPartyConfig} from "#app/utils/mystery-encounter-utils";
+import {EnemyPartyConfig} from "#app/data/mystery-encounters/mystery-encounter-utils";
 
 export enum MysteryEncounterVariant {
   DEFAULT,

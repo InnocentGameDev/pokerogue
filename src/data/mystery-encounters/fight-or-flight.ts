@@ -6,10 +6,10 @@ import {
   leaveEncounterWithoutBattle,
   setEncounterRewards,
   showEncounterText
-} from "#app/utils/mystery-encounter-utils";
+} from "#app/data/mystery-encounters/mystery-encounter-utils";
 import MysteryEncounter, {MysteryEncounterBuilder} from "../mystery-encounter";
 import * as Utils from "../../utils";
-import {MysteryEncounterType} from "../enums/mystery-encounter-type";
+import {MysteryEncounterType} from "#enums/mystery-encounter-type";
 import {WaveCountRequirement} from "../mystery-encounter-requirements";
 import {MysteryEncounterOptionBuilder} from "../mystery-encounter-option";
 import {

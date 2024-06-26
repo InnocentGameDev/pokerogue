@@ -1,13 +1,13 @@
 import BattleScene from "../../battle-scene";
 import { ModifierTier } from "#app/modifier/modifier-tier";
-import { getHighestLevelPlayerPokemon, koPlayerPokemon, leaveEncounterWithoutBattle, setEncounterRewards, showEncounterText } from "#app/utils/mystery-encounter-utils";
+import { getHighestLevelPlayerPokemon, koPlayerPokemon, leaveEncounterWithoutBattle, setEncounterRewards, showEncounterText } from "#app/data/mystery-encounters/mystery-encounter-utils";
 import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
 import * as Utils from "../../utils";
-import { MysteryEncounterType } from "../enums/mystery-encounter-type";
-import { Species } from "../enums/species";
+import { MysteryEncounterType } from "#enums/mystery-encounter-type";
 import { WaveCountRequirement } from "../mystery-encounter-requirements";
 import { MysteryEncounterOptionBuilder } from "../mystery-encounter-option";
 import {GameOverPhase} from "#app/phases";
+import {Species} from "#enums/species";
 
 export const MysteriousChestEncounter: MysteryEncounter = new MysteryEncounterBuilder()
   .withEncounterType(MysteryEncounterType.MYSTERIOUS_CHEST)

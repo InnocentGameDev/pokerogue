@@ -1,4 +1,4 @@
-import {MysteryEncounterType} from "#app/data/enums/mystery-encounter-type";
+import {MysteryEncounterType} from "#enums/mystery-encounter-type";
 import {MysteriousChallengersDialogue} from "#app/data/mystery-encounters/dialogue/mysterious-challengers-dialogue";
 import {MysteriousChestDialogue} from "#app/data/mystery-encounters/dialogue/mysterious-chest-dialogue";
 import {DarkDealDialogue} from "#app/data/mystery-encounters/dialogue/dark-deal-dialogue";
