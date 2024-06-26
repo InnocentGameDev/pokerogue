@@ -4,9 +4,9 @@ import BattleScene from "../battle-scene";
 import {EggTier} from "../data/enums/egg-type";
 import {Species} from "../data/enums/species";
 import {TrainerType} from "../data/enums/trainer-type";
-import {MysteryEncounterVariant} from "../data/mystery-encounter";
+import MysteryEncounter, {MysteryEncounterVariant} from "../data/mystery-encounter";
 import PokemonSpecies, {getPokemonSpecies, speciesStarters} from "../data/pokemon-species";
-import {StatusEffect} from "../data/status-effect";
+import {Status, StatusEffect} from "../data/status-effect";
 import {TrainerConfig, trainerConfigs, TrainerSlot} from "../data/trainer-config";
 import {FieldPosition, PlayerPokemon} from "../field/pokemon";
 import Trainer, {TrainerVariant} from "../field/trainer";
@@ -25,6 +25,7 @@ import {
 import * as Utils from "../utils";
 import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
 import {isNullOrUndefined} from "../utils";
+import { EncounterSceneRequirement } from "#app/data/mystery-encounter-requirements";
 
 /**
  * Util file for functions used in mystery encounters
@@ -95,6 +96,58 @@ export function getRandomPlayerPokemon(scene: BattleScene, isAllowedInBattle: bo
   return chosenPokemon;
 }
 
+
+export function getTokensFromScene(scene:BattleScene, reqs:EncounterSceneRequirement[]): Array<[RegExp, String]> {
+  const arr = [];
+  if (scene) {
+    for (const req of reqs) {
+      req.getMatchingDialogueToken(scene);
+    }
+  }
+  return arr;
+}
+
+// Auto-pushes dialogue tokens based on required attributes.
+// Grabs the first support pokemon. if you want multiple support pokemon in your text, you'll have to write it yourself.
+export function pushDialogueTokensFromPokemon(instance:MysteryEncounter) {
+  if (instance.protagonistPokemon?.length > 0) {
+    instance.dialogueTokens.push([/@ec\{protagonistName\}/gi, instance.protagonistPokemon.name]);
+    for (const req of instance.protagonistPokemonRequirements) {
+      if (!req.invertQuery) {
+        instance.dialogueTokens.push(req.getMatchingDialogueToken("protagonist", instance.protagonistPokemon));
+      }
+    }
+  }
+  if (instance.supportPokemonRequirements?.length > 0 && instance.supportingPokemon?.length > 0) {
+    instance.dialogueTokens.push([/@ec\{supportName\}/gi, instance.supportingPokemon[0].name]);
+    for (const req of instance.supportPokemonRequirements) {
+      if (!req.invertQuery) {
+        instance.dialogueTokens.push(req.getMatchingDialogueToken("support", instance.supportingPokemon[0]));
+      }
+    }
+  }
+  for (let i = 0; i < instance.options.length; i++) {
+    const opt = instance.options[i];
+    const j = i + 1;
+    if (opt.protagonistPokemonRequirements?.length > 0 && opt.protagonistPokemon?.length > 0) {
+      instance.dialogueTokens.push([new RegExp("@ec\{option" + j + "ProtagonistName\\}", "gi"), opt.protagonistPokemon.name]);
+      for (const req of opt.protagonistPokemonRequirements) {
+        if (!req.invertQuery) {
+          instance.dialogueTokens.push(req.getMatchingDialogueToken("option" + j + "Protagonist", opt.protagonistPokemon));
+        }
+      }
+    }
+    if (opt.supportPokemonRequirements?.length > 0 && opt.supportingPokemon?.length > 0) {
+      instance.dialogueTokens.push([new RegExp("@ec\{option" + j + "SupportName\\}", "gi"), opt.supportingPokemon[0].name]);
+      for (const req of opt.supportPokemonRequirements) {
+        if (!req.invertQuery) {
+          instance.dialogueTokens.push(req.getMatchingDialogueToken("option" + j + "Support", opt.supportingPokemon[0]));
+        }
+      }
+    }
+  }
+}
+
 /**
  * Ties are broken by whatever mon is closer to the front of the party
  * @param scene
@@ -154,6 +207,7 @@ export function showEncounterText(scene: BattleScene, contentKey: TemplateString
     const dialogueTokens = scene.currentBattle?.mysteryEncounter?.dialogueTokens;
     if (dialogueTokens) {
       dialogueTokens.forEach((token) => {
+        console.log(token);
         text = text.replace(token[0], token[1]);
       });
     }
@@ -234,6 +288,7 @@ export class EnemyPartyConfig {
   pokemonSpecies?: PokemonSpecies[];
   pokemonBosses?: PokemonSpecies[];
   female?: boolean; // True for female trainer, false for male
+  status?: StatusEffect;
 }
 
 /**
@@ -325,7 +380,10 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
       enemyPokemon.setX(-66 + enemyPokemon.getFieldPositionOffset()[0]);
       enemyPokemon.resetSummonData();
     }
-
+    // we can't use trysetstatus because pokemon aint in battle yet
+    if (partyConfig?.status) {
+      enemyPokemon.status = new Status(partyConfig.status, 3);
+    }
     if (!loaded) {
       scene.gameData.setPokemonSeen(enemyPokemon, true, !!(trainerType || trainerConfig));
     }

@@ -5,9 +5,10 @@ import MysteryEncounterDialogue, {
   allMysteryEncounterDialogue
 } from "./mystery-encounters/dialogue/mystery-encounter-dialogue";
 import MysteryEncounterOption from "./mystery-encounter-option";
-import { EncounterRequirement } from "./mystery-encounter-requirements";
+import { EncounterPokemonRequirement, EncounterSceneRequirement } from "./mystery-encounter-requirements";
 import * as Utils from "../utils";
 import {EnemyPartyConfig} from "#app/utils/mystery-encounter-utils";
+import { PlayerPokemon } from "#app/field/pokemon";
 
 export enum MysteryEncounterVariant {
   DEFAULT,
@@ -36,7 +37,16 @@ export default interface MysteryEncounter {
    * Optional params
    */
   encounterTier?: MysteryEncounterTier;
-  requirements?: EncounterRequirement[];
+  requirements?: EncounterSceneRequirement[];
+  protagonistPokemonRequirements?: EncounterPokemonRequirement[];
+  supportPokemonRequirements ?: EncounterPokemonRequirement[]; // A list of requirements that must ALL be met by a subset of pokemon to trigger the event
+  excludeProtagonistFromSupportRequirements?: boolean;
+  // Protagonist Pokemon is a single pokemon randomly selected from a set of pokemon that meet ALL protagonist pokemon requirements
+  protagonistPokemon?: PlayerPokemon;
+  // Support Pokemon are pokemon that meet ALL support pokemon requirements.
+  // Note that an individual requirement may require multiple pokemon, but the resulting pokemon after all support requirements are met may be lower than expected
+  // If the protagonist pokemon and supporting pokemon are the same and ExcexcludeProtagonistFromSupportRequirements flag is true, protagonist pokemon may be promoted from support pool
+  supportingPokemon?: PlayerPokemon[];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
 
@@ -137,6 +147,86 @@ export default class MysteryEncounter implements MysteryEncounter {
     return !this.requirements.some(requirement => !requirement.meetsRequirement(scene));
   }
 
+  meetsProtagonistRequirementAndProtagonistPokemonSelected?(scene: BattleScene) {
+    if (!this.protagonistPokemonRequirements) {
+      const activeMon = scene.getParty().filter(p => p.isActive());
+      if (activeMon.length > 0) {
+        this.protagonistPokemon =  activeMon[0];
+      }
+      return true;
+    }
+    let qualified:PlayerPokemon[] = scene.getParty();
+    for (const req of this.protagonistPokemonRequirements) {
+      console.log(req);
+      if (req.meetsRequirement(scene)) {
+        if (req instanceof EncounterPokemonRequirement)  {
+          qualified = qualified.filter(pkmn => req.queryParty(scene.getParty()).includes(pkmn));
+        }
+      } else {
+        this.protagonistPokemon = null;
+        return false;
+      }
+    }
+
+    if (qualified.length === 0) {
+      return false;
+    }
+
+    if (this.excludeProtagonistFromSupportRequirements && this.supportingPokemon) {
+      const trueProtagonistPool = [];
+      const overlap = [];
+      for (const qp of qualified) {
+        if (!this.supportingPokemon.includes(qp)) {
+          trueProtagonistPool.push(qp);
+        } else {
+          overlap.push(qp);
+        }
+
+      }
+      if (trueProtagonistPool.length > 0) {
+        // always choose from the non-overlapping pokemon first
+        this.protagonistPokemon =  trueProtagonistPool[Utils.randSeedInt(trueProtagonistPool.length, 0)];
+        return true;
+      } else {
+        // if there are multiple overlapping pokemon, we're okay - just choose one and take it out of the supporting pokemon pool
+        if (overlap.length > 1 || (this.supportingPokemon.length - overlap.length >= 1)) {
+          // is this working?
+          this.protagonistPokemon = overlap[Utils.randSeedInt(overlap.length, 0)];
+          this.supportingPokemon = this.supportingPokemon.filter((supp)=> supp !== this.protagonistPokemon);
+          return true;
+        }
+        console.log("Mystery Encounter Edge Case: Requirement not met due to protagonist pokemon overlapping with support pokemon. There's no valid protagonist pokemon left.");
+        return false;
+      }
+    } else {
+      // this means we CAN have the same pokemon be a protagonist and supporting pokemon, so just choose any qualifying one randomly.
+      this.protagonistPokemon = qualified[Utils.randSeedInt(qualified.length, 0)];
+      return true;
+    }
+  }
+
+  meetsSupportingRequirementAndSupportingPokemonSelected?(scene: BattleScene) {
+    if (!this.supportPokemonRequirements) {
+      this.supportingPokemon = [];
+      return true;
+    }
+
+    let qualified:PlayerPokemon[] = scene.getParty();
+    for (const req of this.supportPokemonRequirements) {
+      if (req.meetsRequirement(scene)) {
+        if (req instanceof EncounterPokemonRequirement)  {
+          qualified = qualified.filter(pkmn => req.queryParty(scene.getParty()).includes(pkmn));
+
+        }
+      } else {
+        this.supportingPokemon = [];
+        return false;
+      }
+    }
+    this.supportingPokemon = qualified;
+    return true;
+  }
+
   /**
    * Initializes encounter intro sprites based on the sprite configs defined in spriteConfigs
    * @param scene
@@ -153,7 +243,10 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
 
   dialogue?: MysteryEncounterDialogue;
   encounterTier?: MysteryEncounterTier;
-  requirements?: EncounterRequirement[] = [];
+  requirements?: EncounterSceneRequirement[] = [];
+  protagonistPokemonRequirements?: EncounterPokemonRequirement[] = [];
+  supportPokemonRequirements ?: EncounterPokemonRequirement[] = [];
+  excludeProtagonistFromSupportRequirements?: boolean;
   dialogueTokens?: [RegExp, string][];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
@@ -226,10 +319,30 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
    * @param requirement
    * @returns
    */
-  withRequirement(requirement: EncounterRequirement): this & Required<Pick<MysteryEncounter, "requirements">> {
+  withSceneRequirement(requirement: EncounterSceneRequirement): this & Required<Pick<MysteryEncounter, "requirements">> {
+    if (requirement instanceof EncounterPokemonRequirement) {
+      Error("Incorrectly added pokemon requirement as scene requirement.");
+    }
     this.requirements.push(requirement);
     return Object.assign(this, { requirements: this.requirements });
   }
+
+  withProtagonistPokemonRequirement(requirement: EncounterPokemonRequirement): this & Required<Pick<MysteryEncounter, "protagonistPokemonRequirements">> {
+    this.protagonistPokemonRequirements.push(requirement);
+    return Object.assign(this, { protagonistPokemonRequirements: this.protagonistPokemonRequirements });
+  }
+
+  // TODO: Maybe add an optional parameter for excluding protagonist pokemon from the support cast?
+  // ex. if your only grass type pokemon, a snivy, is chosen as protagonist, if the support pokemon requires a grass type, the event won't trigger because
+  // it's already been
+  withSupportPokemonRequirement(requirement: EncounterPokemonRequirement, excludeProtagonistFromSupportRequirements:boolean = false): this & Required<Pick<MysteryEncounter, "supportPokemonRequirements">> {
+    this.supportPokemonRequirements.push(requirement);
+    this.excludeProtagonistFromSupportRequirements = excludeProtagonistFromSupportRequirements;
+    return Object.assign(this, { excludeProtagonistFromSupportRequirements: this.excludeProtagonistFromSupportRequirements, supportPokemonRequirements: this.supportPokemonRequirements });
+  }
+
+
+  //TODO: Split this into withSceneRequirement and withProtagonistPokemonRequirement and withSupportingPokemonRequirement
 
   /**
    * Can set custom encounter rewards via this callback function

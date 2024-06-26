@@ -82,4 +82,25 @@ export const mysteryEncounter: SimpleTranslationEntries = {
   "fight_or_flight_option_3_selected": "You leave the strong Pokémon\nwith its prize and continue on.",
   // "fight_or_flight_outro_win": "The mysterious challengers were defeated!",
 
+  "sleeping_snorlax_intro_message": `As you walk down a narrow pathway, you see a towering silhouette blocking your path.
+  $You get closer to see a Snorlax sleeping peacefully.\nIt seems like there's no way around it.`,
+  "sleeping_snorlax_title": "Sleeping Snorlax",
+  "sleeping_snorlax_description": "Do you attack it to try and get it to move, or wait for it to wake up?",
+  "sleeping_snorlax_query": "What will you do?",
+  "sleeping_snorlax_option_1_label": "Fight it",
+  "sleeping_snorlax_option_1_tooltip": "(+) Fight Sleeping Snorlax",
+  "sleeping_snorlax_option_2_label": "Wait for it to move",
+  "sleeping_snorlax_option_2_tooltip": "(75%) Party member falls asleep\n(25%) All Pokémon healed",
+  "sleeping_snorlax_option_3_label": "Steal",
+  "sleeping_snorlax_option_3_tooltip": "(+) Leftovers",
+  "sleeping_snorlax_option_1_selected_message": "You approach the\nPokémon without fear.",
+  "sleeping_snorlax_option_2_selected_message": `.@d{32}.@d{32}.@d{32}
+  $You wait for a time, but the Snorlax's yawns make your party sleepy.`,
+  "sleeping_snorlax_option_2_good_result": "When you all awaken, the Snorlax is no where to be found - but your Pokémon are all healed!",
+  "sleeping_snorlax_option_2_bad_result": `Your @ec{option2ProtagonistName} is still asleep...
+  $But on the bright side, the Snorlax left something behind...
+  $@s{item_fanfare}You gained a Leftovers!\nApply it to one of your Pokémon.`,
+  "sleeping_snorlax_option_3_good_result": "Your @ec{option3ProtagonistName} uses @ec{option3ProtagonistMove}! It steals Leftovers off the sleeping Snorlax and you make out like bandits!",
+  // "sleeping_snorlax_outro_win": "The mysterious challengers were defeated!",
+
 } as const;

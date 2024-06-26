@@ -25,8 +25,8 @@ export const DarkDealEncounter: MysteryEncounter = new MysteryEncounterBuilder()
       repeat: true
     }
   ])
-  .withRequirement(new WaveCountRequirement([30, 180])) // waves 30 to 180
-  .withRequirement(new PartySizeRequirement([2, 6])) // Must have at least 2 pokemon in party
+  .withSceneRequirement(new WaveCountRequirement([30, 180])) // waves 30 to 180
+  .withSceneRequirement(new PartySizeRequirement([2, 6])) // Must have at least 2 pokemon in party
   .withCatchAllowed(true)
   .withOption(new MysteryEncounterOptionBuilder()
     .withPreOptionPhase((scene: BattleScene) => {
