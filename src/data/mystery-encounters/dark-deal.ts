@@ -59,7 +59,7 @@ export const DarkDealEncounter: MysteryEncounter = new MysteryEncounterBuilder()
       const bossSpecies = getPokemonSpecies(getRandomSpeciesByEggTier(scene, [EggTier.ULTRA, EggTier.MASTER], bossTypes));
       const config: EnemyPartyConfig = {
         levelAdditiveMultiplier: 1,
-        pokemonBosses: [bossSpecies]
+        pokemonConfigs: [{species: bossSpecies, isBoss: true}]
       };
       setEncounterRewards(scene, {});
       return initBattleWithEnemyConfig(scene, config);

@@ -51,7 +51,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
     const hardSpriteKey = hardConfig.getSpriteKey(female, hardConfig.doubleOnly);
     instance.enemyPartyConfigs.push({
       trainerConfig: hardConfig,
-      levelAdditiveMultiplier: 1,
+      levelAdditiveMultiplier: 0.75,
       female: female,
     });
 
@@ -103,7 +103,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
       // Spawn standard trainer battle with memory mushroom reward
       const config: EnemyPartyConfig = encounter.enemyPartyConfigs[0];
 
-      setEncounterRewards(scene, { guaranteedModifiers: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM], fillRemaining: true });
+      setEncounterRewards(scene, { guaranteedModifierTypeFuncs: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM], fillRemaining: true });
 
       return initBattleWithEnemyConfig(scene, config);
     })

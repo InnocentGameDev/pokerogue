@@ -167,7 +167,7 @@ export class MysteryEncounterBattlePhase extends Phase {
       : i18next.t("battle:multiWildAppeared", { pokemonName1: enemyField[0].name, pokemonName2: enemyField[1].name });
   }
 
-  doMysteryEncounterBattle(scene: BattleScene, showEncounterMessage: boolean = true) {
+  doMysteryEncounterBattle(scene: BattleScene) {
     const encounterVariant = scene.currentBattle.mysteryEncounter.encounterVariant;
     if (encounterVariant === MysteryEncounterVariant.WILD_BATTLE || encounterVariant === MysteryEncounterVariant.BOSS_BATTLE) {
       // Summons the wild/boss Pokemon
@@ -177,7 +177,7 @@ export class MysteryEncounterBattlePhase extends Phase {
         scene.unshiftPhase(new SummonPhase(scene, 1, false));
       }
 
-      if (showEncounterMessage) {
+      if (!scene.currentBattle.mysteryEncounter.hideBattleIntroMessage) {
         scene.ui.showText(this.getBattleMessage(scene), null, () => this.endBattleSetup(scene), 1500);
       } else {
         this.endBattleSetup(scene);
@@ -216,7 +216,7 @@ export class MysteryEncounterBattlePhase extends Phase {
           }
           this.endBattleSetup(scene);
         };
-        if (showEncounterMessage) {
+        if (!scene.currentBattle.mysteryEncounter.hideBattleIntroMessage) {
           scene.ui.showText(this.getBattleMessage(scene), null, doTrainerSummon, 1500, true);
         } else {
           doTrainerSummon();

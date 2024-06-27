@@ -19,7 +19,15 @@ import { biomeLinks, getBiomeName } from "./data/biomes";
 import { ModifierTier } from "./modifier/modifier-tier";
 import { ModifierPoolType, ModifierType, ModifierTypeFunc, getDailyRunStarterModifiers, getEnemyBuffModifierForWave, getModifierType, modifierTypes, regenerateModifierPoolThresholds } from "./modifier/modifier-type";
 import SoundFade from "phaser3-rex-plugins/plugins/soundfade";
-import { BattlerTagLapseType, CenterOfAttentionTag, EncoreTag, ProtectedTag, SemiInvulnerableTag, TrappedTag } from "./data/battler-tags";
+import {
+  BattlerTagLapseType,
+  CenterOfAttentionTag,
+  EncoreTag,
+  EnragedTag,
+  ProtectedTag,
+  SemiInvulnerableTag,
+  TrappedTag
+} from "./data/battler-tags";
 import { getPokemonMessage, getPokemonNameWithAffix } from "./messages";
 import { Starter } from "./ui/starter-select-ui-handler";
 import { Gender } from "./data/gender";
@@ -1239,6 +1247,12 @@ export class PostSummonPhase extends PokemonPhase {
       pokemon.status.turnCount = 0;
     }
     this.scene.arena.applyTags(ArenaTrapTag, pokemon);
+
+    // If this is fight or flight mystery encounter and is enemy pokemon summon phase, add enraged tag
+    if (pokemon.findTags(t => t instanceof EnragedTag)) {
+      pokemon.lapseTag(BattlerTagType.ENRAGED);
+    }
+
     applyPostSummonAbAttrs(PostSummonAbAttr, pokemon).then(() => this.end());
   }
 }

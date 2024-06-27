@@ -123,7 +123,7 @@ describe("SelectModifierPhase", () => {
 
   it("should generate custom modifiers", async () => {
     const customModifiers: CustomModifierSettings = {
-      guaranteedModifiers: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.TM_ULTRA, modifierTypes.LEFTOVERS, modifierTypes.AMULET_COIN, modifierTypes.GOLDEN_PUNCH]
+      guaranteedModifierTypeFuncs: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.TM_ULTRA, modifierTypes.LEFTOVERS, modifierTypes.AMULET_COIN, modifierTypes.GOLDEN_PUNCH]
     };
     const selectModifierPhase = new SelectModifierPhase(scene, 0, null, customModifiers);
     scene.pushPhase(selectModifierPhase);
@@ -160,7 +160,7 @@ describe("SelectModifierPhase", () => {
 
   it("should generate custom modifiers and modifier tiers together", async () => {
     const customModifiers: CustomModifierSettings = {
-      guaranteedModifiers: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.TM_COMMON],
+      guaranteedModifierTypeFuncs: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.TM_COMMON],
       guaranteedModifierTiers: [ModifierTier.MASTER, ModifierTier.MASTER]
     };
     const selectModifierPhase = new SelectModifierPhase(scene, 0, null, customModifiers);
@@ -179,7 +179,7 @@ describe("SelectModifierPhase", () => {
 
   it("should fill remaining modifiers if fillRemaining is true with custom modifiers", async () => {
     const customModifiers: CustomModifierSettings = {
-      guaranteedModifiers: [modifierTypes.MEMORY_MUSHROOM],
+      guaranteedModifierTypeFuncs: [modifierTypes.MEMORY_MUSHROOM],
       guaranteedModifierTiers: [ModifierTier.MASTER],
       fillRemaining: true
     };

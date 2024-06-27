@@ -21,25 +21,42 @@ export const mysteryEncounter: SimpleTranslationEntries = {
   "mysterious_chest_option_1_bad_result": `Oh no!@d{32}\nThe chest was trapped!
   $Your @ec{pokeName} jumps in front of you\nbut is KOed in the process.`,
 
-  // Mysterious Encounters -- Rare Tier
+  "fight_or_flight_intro_message": "Something shiny is sparkling\non the ground near that Pokémon!",
+  "fight_or_flight_title": "Fight or Flight",
+  "fight_or_flight_description": "It looks like there's a strong Pokémon guarding an item. Fighting is the straightforward approach, but this Pokémon looks strong. You could also try to sneak around, but the Pokémon may catch you.",
+  "fight_or_flight_query": "What will you do?",
+  "fight_or_flight_option_1_label": "Fight it",
+  "fight_or_flight_option_1_tooltip": "(+) Strong Pokémon Battle\n(+) New Item",
+  "fight_or_flight_option_2_label": "Sneak around",
+  "fight_or_flight_option_2_tooltip": "(?%) New Item\n(?%) Hard Battle\n(?%) No Rewards",
+  "fight_or_flight_option_3_label": "Leave",
+  "fight_or_flight_option_3_tooltip": "(-) No Rewards",
+  "fight_or_flight_option_1_selected_message": "You approach the\nPokémon without fear.",
+  "fight_or_flight_option_2_good_result": `.@d{32}.@d{32}.@d{32}
+  $You manage to sneak your way\npast and grab the item!`,
+  "fight_or_flight_option_2_bad_result": `.@d{32}.@d{32}.@d{32}
+  $The Pokémon catches you\nas you try to sneak around!`,
+  "fight_or_flight_option_3_selected": "You leave the strong Pokémon\nwith its prize and continue on.",
+
+  // Mysterious Encounters -- Uncommon Tier
 
   "mysterious_challengers_intro_message": "Mysterious challengers have appeared!",
   "mysterious_challengers_title": "Mysterious Challengers",
   "mysterious_challengers_description": "If you defeat a challenger, you might impress them enough to receive a boon. But some look tough, are you up to the challenge?",
   "mysterious_challengers_query": "Who will you battle?",
-  "mysterious_challengers_option_1_label": "A weak, clever foe",
-  "mysterious_challengers_option_1_tooltip": "(+) Standard Battle\n(+) Standard Reward",
+  "mysterious_challengers_option_1_label": "A clever, mindful foe",
+  "mysterious_challengers_option_1_tooltip": "(+) Standard Battle\n(+) Memory Mushroom",
   "mysterious_challengers_option_2_label": "A strong foe",
-  "mysterious_challengers_option_2_tooltip": "(+) Hard Battle\n(+) Good Reward",
+  "mysterious_challengers_option_2_tooltip": "(+) Hard Battle\n(+) Good Rewards",
   "mysterious_challengers_option_3_label": "The mightiest foe",
-  "mysterious_challengers_option_3_tooltip": "(+) Brutal Battle\n(+) Great Reward",
+  "mysterious_challengers_option_3_tooltip": "(+) Brutal Battle\n(+) Great Rewards",
   "mysterious_challengers_option_selected_message": "The trainer steps forward...",
   "mysterious_challengers_outro_win": "The mysterious challenger was defeated!",
 
-  // Mysterious Encounters -- Epic Tier
+  // Mysterious Encounters -- Rare Tier
   // Gholdengo Gang
 
-  // Mysterious Encounters -- Legendary Tier
+  // Mysterious Encounters -- Super Rare Tier
 
   "dark_deal_intro_message": "A strange man in a tattered coat\nstands in your way...",
   "dark_deal_speaker": "Shady Guy",
@@ -61,25 +78,6 @@ export const mysteryEncounter: SimpleTranslationEntries = {
   $Flashing lights and weird noises\nstart coming from the machine!
   $...@d{96} Something emerges\nfrom the device, raging wildly!`,
   "dark_deal_option_2_selected": "Not gonna help a poor fellow out?\nPah!",
-  "dark_deal_outro": "After the harrowing encounter,\nyou collect yourself and depart.",
-
-  "fight_or_flight_intro_message": "Something shiny is sparkling\non the ground near that Pokémon!",
-  "fight_or_flight_title": "Fight or Flight",
-  "fight_or_flight_description": "It looks like there's a strong Pokémon guarding an item. Fighting is the straightforward approach, but this Pokémon looks strong. You could also try to sneak around, but the Pokémon may catch you.",
-  "fight_or_flight_query": "What will you do?",
-  "fight_or_flight_option_1_label": "Fight it",
-  "fight_or_flight_option_1_tooltip": "(+) Strong Pokémon Battle\n(+) New Item",
-  "fight_or_flight_option_2_label": "Sneak around",
-  "fight_or_flight_option_2_tooltip": "(?%) New Item\n(?%) Hard Battle\n(?%) No Rewards",
-  "fight_or_flight_option_3_label": "Leave",
-  "fight_or_flight_option_3_tooltip": "(-) No Rewards",
-  "fight_or_flight_option_1_selected_message": "You approach the\nPokémon without fear.",
-  "fight_or_flight_option_2_good_result": `.@d{32}.@d{32}.@d{32}
-  $You manage to sneak your way\npast and grab the item!`,
-  "fight_or_flight_option_2_bad_result": `.@d{32}.@d{32}.@d{32}
-  $The Pokémon catches you\nas you try to sneak around!
-  $The item is tossed\nfar into the distance...`,
-  "fight_or_flight_option_3_selected": "You leave the strong Pokémon\nwith its prize and continue on.",
-  // "fight_or_flight_outro_win": "The mysterious challengers were defeated!",
+  "dark_deal_outro": "After the harrowing encounter,\nyou collect yourself and depart."
 
 } as const;

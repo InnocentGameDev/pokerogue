@@ -39,7 +39,7 @@ export default interface MysteryEncounter {
   requirements?: EncounterRequirement[];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
-
+  hideBattleIntroMessage?: boolean;
 
   /**
    * Post-construct / Auto-populated params
@@ -119,6 +119,7 @@ export default class MysteryEncounter implements MysteryEncounter {
     this.dialogue = allMysteryEncounterDialogue[this.encounterType];
     this.encounterVariant = MysteryEncounterVariant.DEFAULT;
     this.requirements = this.requirements ? this.requirements : [];
+    this.hideBattleIntroMessage = !!this.hideBattleIntroMessage;
 
     // Reset any dirty flags or encounter data
     this.lockEncounterRewardTiers = true;
@@ -158,6 +159,7 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
   dialogueTokens?: [RegExp, string][];
   doEncounterRewards?: (scene: BattleScene) => boolean;
   onInit?: (scene: BattleScene) => boolean;
+  hideBattleIntroMessage?: boolean;
   enemyPartyConfigs?: EnemyPartyConfig[] = [];
 
   /**
@@ -269,13 +271,23 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
   }
 
   /**
- * Can set whether catching is allowed or not on the encounter
- * This flag can also be programmatically set inside option event functions or elsewhere
- * @param catchAllowed - if true, allows enemy pokemon to be caught during the encounter
- * @returns
- */
+   * Can set whether catching is allowed or not on the encounter
+   * This flag can also be programmatically set inside option event functions or elsewhere
+   * @param catchAllowed - if true, allows enemy pokemon to be caught during the encounter
+   * @returns
+   */
   withCatchAllowed(catchAllowed: boolean): this & Required<Pick<MysteryEncounter, "catchAllowed">> {
     return Object.assign(this, { catchAllowed: catchAllowed });
+  }
+
+  /**
+   * Can set whether catching is allowed or not on the encounter
+   * This flag can also be programmatically set inside option event functions or elsewhere
+   * @param hideBattleIntroMessage - if true, will not show the trainerAppeared/wildAppeared/bossAppeared message for an encounter
+   * @returns
+   */
+  withHideWildIntroMessage(hideBattleIntroMessage: boolean): this & Required<Pick<MysteryEncounter, "hideBattleIntroMessage">> {
+    return Object.assign(this, { hideBattleIntroMessage: hideBattleIntroMessage });
   }
 
   build(this: MysteryEncounter) {

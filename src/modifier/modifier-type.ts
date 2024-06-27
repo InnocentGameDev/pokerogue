@@ -1795,7 +1795,8 @@ export function regenerateModifierPoolThresholds(party: Pokemon[], poolType: Mod
 
 export interface CustomModifierSettings {
   guaranteedModifierTiers?: ModifierTier[];
-  guaranteedModifiers?: ModifierTypeFunc[];
+  guaranteedModifierTypeOptions?: ModifierTypeOption[];
+  guaranteedModifierTypeFuncs?: ModifierTypeFunc[];
   fillRemaining?: boolean;
 }
 
@@ -1812,8 +1813,15 @@ export function getPlayerModifierTypeOptions(count: integer, party: PlayerPokemo
     });
   } else {
     // Guaranteed mods first
-    if (customModifierSettings?.guaranteedModifiers?.length) {
-      customModifierSettings?.guaranteedModifiers.forEach((mod, i) => {
+    if (customModifierSettings?.guaranteedModifierTypeOptions?.length) {
+      customModifierSettings?.guaranteedModifierTypeOptions.forEach((option) => {
+        options.push(option);
+      });
+    }
+
+    // Guaranteed mod funcs second
+    if (customModifierSettings?.guaranteedModifierTypeFuncs?.length) {
+      customModifierSettings?.guaranteedModifierTypeFuncs.forEach((mod, i) => {
         const modifierId = Object.keys(modifierTypes).find(k => modifierTypes[k] === mod);
         let guaranteedMod: ModifierType = modifierTypes[modifierId]?.();
 
@@ -1837,7 +1845,7 @@ export function getPlayerModifierTypeOptions(count: integer, party: PlayerPokemo
       });
     }
 
-    // Guaranteed tiers second
+    // Guaranteed tiers third
     if (customModifierSettings?.guaranteedModifierTiers?.length) {
       customModifierSettings?.guaranteedModifierTiers.forEach((tier) => {
         options.push(getModifierTypeOptionWithLuckUpgrades(options, retryCount, party, tier));

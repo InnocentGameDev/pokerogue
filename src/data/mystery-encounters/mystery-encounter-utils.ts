@@ -31,6 +31,7 @@ import {TrainerType} from "#enums/trainer-type";
 import {EggTier} from "#enums/egg-type";
 import {Species} from "#enums/species";
 import {Type} from "#app/data/type";
+import {BattlerTagType} from "#enums/battler-tag-type";
 
 /**
  * Util file for functions used in mystery encounters
@@ -240,13 +241,20 @@ export function getRandomSpeciesByEggTier(scene: BattleScene, tiers: EggTier[], 
   return Phaser.Math.RND.shuffle(filteredSpecies)[index];
 }
 
+export class EnemyPokemonConfig {
+  species: PokemonSpecies;
+  isBoss: boolean = false;
+  tags?: BattlerTagType[];
+}
+
 export class EnemyPartyConfig {
   levelAdditiveMultiplier?: number = 0; // Formula for enemy: level += waveIndex / 10 * levelAdditive
   doubleBattle?: boolean = false;
   trainerType?: TrainerType; // Generates trainer battle solely off trainer type
   trainerConfig?: TrainerConfig; // More customizable option for configuring trainer battle
-  pokemonSpecies?: PokemonSpecies[];
-  pokemonBosses?: PokemonSpecies[];
+  pokemonConfigs?: EnemyPokemonConfig[];
+  // pokemonSpecies?: PokemonSpecies[];
+  // pokemonBosses?: PokemonSpecies[];
   female?: boolean; // True for female trainer, false for male
 }
 
@@ -263,8 +271,8 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
 
   const battle = scene.currentBattle;
 
-  const normalCount = partyConfig?.pokemonSpecies?.length || 0;
-  const bossCount = partyConfig?.pokemonBosses?.length || 0;
+  // const normalCount = partyConfig?.pokemonConfigs?.filter(p => !p.isBoss)?.length || 0;
+  // const bossCount = partyConfig?.pokemonConfigs?.filter(p => p.isBoss)?.length || 0;
   let doubleBattle = partyConfig?.doubleBattle;
 
   // Trainer
@@ -293,7 +301,7 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
   } else {
     // Wild
     scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.WILD_BATTLE;
-    battle.enemyLevels = new Array(normalCount + bossCount > 0 ? normalCount + bossCount : doubleBattle ? 2 : 1).fill(null).map(() => scene.currentBattle.getLevelForWave());
+    battle.enemyLevels = new Array(partyConfig?.pokemonConfigs?.length > 0 ? partyConfig?.pokemonConfigs?.length : doubleBattle ? 2 : 1).fill(null).map(() => scene.currentBattle.getLevelForWave());
   }
 
   scene.getEnemyParty().forEach(enemyPokemon => enemyPokemon.destroy());
@@ -319,16 +327,26 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
         // Normal pokemon loaded first, Bosses second
         // If no species are specified, picks random
 
-        if (normalCount - 1 >= e) {
-          enemySpecies = partyConfig?.pokemonSpecies?.[e];
-        } else if (bossCount - 1 >= e - normalCount) {
-          scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.BOSS_BATTLE;
-          isBoss = true;
-          enemySpecies = partyConfig?.pokemonBosses?.[e];
+        if (e < partyConfig?.pokemonConfigs?.length) {
+          const config = partyConfig?.pokemonConfigs?.[e];
+          enemySpecies = config.species;
+          isBoss = config.isBoss;
+          if (isBoss) {
+            scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.BOSS_BATTLE;
+          }
         } else {
           enemySpecies = scene.randomSpecies(battle.waveIndex, level, true);
         }
 
+        // if (normalCount - 1 >= e) {
+        //   enemySpecies = partyConfig?.pokemonSpecies?.[e];
+        // } else if (bossCount - 1 >= e - normalCount) {
+        //   scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.BOSS_BATTLE;
+        //   isBoss = true;
+        //   enemySpecies = partyConfig?.pokemonBosses?.[e];
+        // } else {
+        //   enemySpecies = scene.randomSpecies(battle.waveIndex, level, true);
+        // }
         battle.enemyParty[e] = scene.addEnemyPokemon(enemySpecies, level, TrainerSlot.NONE, isBoss);
       }
     }
@@ -345,6 +363,14 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
 
     if (!loaded) {
       scene.gameData.setPokemonSeen(enemyPokemon, true, !!(trainerType || trainerConfig));
+    }
+
+    if (e < partyConfig?.pokemonConfigs?.length && partyConfig?.pokemonConfigs?.[e].tags?.length > 0) {
+      const tags = partyConfig?.pokemonConfigs?.[e].tags;
+      tags.forEach(tag => enemyPokemon.addTag(tag));
+
+      // Requires re-priming summon data so that tags are not cleared on SummonPhase
+      enemyPokemon.primeSummonData(enemyPokemon.summonData);
     }
 
     loadEnemyAssets.push(enemyPokemon.loadAssets());

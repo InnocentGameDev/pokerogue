@@ -3,9 +3,25 @@ import UI from "./ui/ui";
 import { NextEncounterPhase, NewBiomeEncounterPhase, SelectBiomePhase, MessagePhase, TurnInitPhase, ReturnPhase, LevelCapPhase, ShowTrainerPhase, LoginPhase, MovePhase, TitlePhase, SwitchPhase } from "./phases";
 import Pokemon, { PlayerPokemon, EnemyPokemon } from "./field/pokemon";
 import PokemonSpecies, { PokemonSpeciesFilter, allSpecies, getPokemonSpecies } from "./data/pokemon-species";
-import { Constructor } from "#app/utils";
+import {Constructor, isNullOrUndefined} from "#app/utils";
 import * as Utils from "./utils";
-import { Modifier, ModifierBar, ConsumablePokemonModifier, ConsumableModifier, PokemonHpRestoreModifier, HealingBoosterModifier, PersistentModifier, PokemonHeldItemModifier, ModifierPredicate, DoubleBattleChanceBoosterModifier, FusePokemonModifier, PokemonFormChangeItemModifier, TerastallizeModifier, overrideModifiers, overrideHeldItems } from "./modifier/modifier";
+import {
+  Modifier,
+  ModifierBar,
+  ConsumablePokemonModifier,
+  ConsumableModifier,
+  PokemonHpRestoreModifier,
+  HealingBoosterModifier,
+  PersistentModifier,
+  PokemonHeldItemModifier,
+  ModifierPredicate,
+  DoubleBattleChanceBoosterModifier,
+  FusePokemonModifier,
+  PokemonFormChangeItemModifier,
+  TerastallizeModifier,
+  overrideModifiers,
+  overrideHeldItems
+} from "./modifier/modifier";
 import { PokeballType } from "./data/pokeball";
 import { initCommonAnims, initMoveAnim, loadCommonAnimAssets, loadMoveAnimAssets, populateAnims } from "./data/battle-anims";
 import { Phase } from "./phase";
@@ -44,7 +60,7 @@ import PokemonSpriteSparkleHandler from "./field/pokemon-sprite-sparkle-handler"
 import CharSprite from "./ui/char-sprite";
 import DamageNumberHandler from "./field/damage-number-handler";
 import PokemonInfoContainer from "./ui/pokemon-info-container";
-import { biomeDepths, getBiomeName } from "./data/biomes";
+import {biomeDepths, biomeLinks, getBiomeName} from "./data/biomes";
 import { SceneBase } from "./scene-base";
 import CandyBar from "./ui/candy-bar";
 import { Variant, variantData } from "./data/variant";
@@ -1024,7 +1040,95 @@ export default class BattleScene extends SceneBase {
     }
   }
 
+  // TODO: remove once encounter spawn rate is finalized
+  // Just a helper function to calculate stats on MEs per run
+  aggregateEncountersPerRun(startingWeight: number) {
+    const numRuns = 1000;
+    let run = 0;
+
+    const calculateNumEncounters = (): number => {
+      let encounterRate = startingWeight;
+      let numEncounters = 0;
+      let currentBiome = Biome.TOWN;
+      let currentArena = this.newArena(currentBiome);
+      for (let i = 3; i < 180; i++) {
+        // Boss
+        if (i % 10 === 0) {
+          continue;
+        }
+
+        // New biome
+        if (i % 10 === 1) {
+          if (Array.isArray(biomeLinks[currentBiome])) {
+            let biomes: Biome[];
+            this.executeWithSeedOffset(() => {
+              biomes = (biomeLinks[currentBiome] as (Biome | [Biome, integer])[])
+                .filter(b => !Array.isArray(b) || !Utils.randSeedInt(b[1]))
+                .map(b => !Array.isArray(b) ? b : b[0]);
+            }, i);
+            currentBiome = biomes[Utils.randSeedInt(biomes.length)];
+          } else if (biomeLinks.hasOwnProperty(currentBiome)) {
+            currentBiome = (biomeLinks[currentBiome] as Biome);
+          } else {
+            if (!(i % 50)) {
+              currentBiome = Biome.END;
+            } else {
+              currentBiome = this.generateRandomBiome(i);
+            }
+          }
+
+          currentArena = this.newArena(currentBiome);
+        }
+
+        // Fixed battle
+        if (this.gameMode.isFixedBattle(i)) {
+          continue;
+        }
+
+        // Trainer
+        if (this.gameMode.isWaveTrainer(i, currentArena)) {
+          continue;
+        }
+
+        // Otherwise, roll encounter
+
+        const roll = Utils.randSeedInt(64);
+
+        if (roll < encounterRate) {
+          numEncounters++;
+          encounterRate = startingWeight;
+        } else {
+          encounterRate++;
+        }
+      }
+
+      return numEncounters;
+    };
+
+    const runs = [];
+    while (run < numRuns) {
+      this.executeWithSeedOffset(() => {
+        const numEncounters = calculateNumEncounters();
+        runs.push(numEncounters);
+      }, 1000 * run);
+      run++;
+    }
+
+    const n = runs.length;
+    const mean = runs.reduce((a, b) => a + b) / n;
+    const std = Math.sqrt(runs.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n);
+
+    console.log(`Starting weight: ${startingWeight}\nAverage MEs per run: ${mean}\nStandard Deviation: ${std}`);
+  }
+
   newBattle(waveIndex?: integer, battleType?: BattleType, trainerData?: TrainerData, double?: boolean, mysteryEncounter?: MysteryEncounter): Battle {
+    // TODO: remove once encounter spawn rate is finalized
+    // let startingWeight = 0;
+    // while (startingWeight < 16) {
+    //   this.aggregateEncountersPerRun(startingWeight);
+    //   startingWeight++;
+    // }
+
     const _startingWave = Overrides.STARTING_WAVE_OVERRIDE || startingWave;
     const newWaveIndex = waveIndex || ((this.currentBattle?.waveIndex || (_startingWave - 1)) + 1);
     let newDouble: boolean;
@@ -1073,12 +1177,19 @@ export default class BattleScene extends SceneBase {
       // Can only occur in place of a standard wild battle
       // They will also never be found outside of waves 3-180 in classic mode
       if (this.gameMode.hasMysteryEncounters && newBattleType === BattleType.WILD && !this.gameMode.isBoss(newWaveIndex) && !(this.gameMode.isClassic && (newWaveIndex > 180 || newWaveIndex < 3))) {
-        // Roll for mystery encounter instead of wild battle (25% chance)
+        // Roll for mystery encounter instead of wild battle
         const roll = Utils.randSeedInt(64);
-        const successRate = Utils.isNullOrUndefined(Overrides.MYSTERY_ENCOUNTER_RATE_OVERRIDE) ? 16 : Overrides.MYSTERY_ENCOUNTER_RATE_OVERRIDE;
+
+        // Base spawn chance is 5/64, and increases by 1/64 for each missed attempt at spawning an encounter on a valid floor
+        const sessionEncounterRate = !isNullOrUndefined(this.mysteryEncounterFlags?.encounterSpawnChance) ? this.mysteryEncounterFlags.encounterSpawnChance : 20;
+
+        const successRate = Utils.isNullOrUndefined(Overrides.MYSTERY_ENCOUNTER_RATE_OVERRIDE) ? sessionEncounterRate : Overrides.MYSTERY_ENCOUNTER_RATE_OVERRIDE;
 
         if (roll < successRate) {
           newBattleType = BattleType.MYSTERY_ENCOUNTER;
+          this.mysteryEncounterFlags.encounterSpawnChance = 20;
+        } else {
+          this.mysteryEncounterFlags.encounterSpawnChance = sessionEncounterRate + 1;
         }
       }
     }
@@ -1139,8 +1250,6 @@ export default class BattleScene extends SceneBase {
       // Add intro visuals for mystery encounter
       newEncounter.initIntroVisuals(this);
       this.field.add(newEncounter.introVisuals);
-
-      // this.currentBattle.mysteryEncounter = newEncounter;
     }
 
     //this.pushPhase(new TrainerMessageTestPhase(this, TrainerType.RIVAL, TrainerType.RIVAL_2, TrainerType.RIVAL_3, TrainerType.RIVAL_4, TrainerType.RIVAL_5, TrainerType.RIVAL_6));
