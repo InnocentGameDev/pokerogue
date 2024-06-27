@@ -5,8 +5,7 @@ import {
   initBattleWithEnemyConfig,
   getRandomSpeciesByEggTier,
   leaveEncounterWithoutBattle,
-  getRandomPlayerPokemon,
-  setEncounterRewards
+  getRandomPlayerPokemon
 } from "./mystery-encounter-utils";
 import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
 import {ModifierRewardPhase} from "#app/phases";
@@ -61,7 +60,6 @@ export const DarkDealEncounter: MysteryEncounter = new MysteryEncounterBuilder()
         levelAdditiveMultiplier: 1,
         pokemonConfigs: [{species: bossSpecies, isBoss: true}]
       };
-      setEncounterRewards(scene, {});
       return initBattleWithEnemyConfig(scene, config);
     })
     .build())

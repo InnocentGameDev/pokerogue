@@ -4,7 +4,7 @@ import {
   EnemyPartyConfig,
   initBattleWithEnemyConfig,
   leaveEncounterWithoutBattle,
-  setEncounterRewards,
+  setCustomEncounterRewards,
   showEncounterText
 } from "#app/data/mystery-encounters/mystery-encounter-utils";
 import MysteryEncounter, {MysteryEncounterBuilder} from "../mystery-encounter";
@@ -71,7 +71,7 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
     .withOptionPhase(async (scene: BattleScene) => {
       // Pick battle
       const item = scene.currentBattle.mysteryEncounter.misc as ModifierTypeOption;
-      setEncounterRewards(scene, { guaranteedModifierTypeOptions: [item], fillRemaining: false});
+      setCustomEncounterRewards(scene, { guaranteedModifierTypeOptions: [item], fillRemaining: false});
       await initBattleWithEnemyConfig(scene, scene.currentBattle.mysteryEncounter.enemyPartyConfigs[0]);
     })
     .build())
@@ -79,7 +79,7 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
     .withOptionPhase(async (scene: BattleScene) => {
       // Pick steal
       const item = scene.currentBattle.mysteryEncounter.misc as ModifierTypeOption;
-      setEncounterRewards(scene, { guaranteedModifierTypeOptions: [item], fillRemaining: false});
+      setCustomEncounterRewards(scene, { guaranteedModifierTypeOptions: [item], fillRemaining: false});
 
       const roll = Utils.randSeedInt(16);
       if (roll > 4) {

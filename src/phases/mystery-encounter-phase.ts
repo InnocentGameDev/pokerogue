@@ -171,6 +171,9 @@ export class MysteryEncounterBattlePhase extends Phase {
     const encounterVariant = scene.currentBattle.mysteryEncounter.encounterVariant;
     if (encounterVariant === MysteryEncounterVariant.WILD_BATTLE || encounterVariant === MysteryEncounterVariant.BOSS_BATTLE) {
       // Summons the wild/boss Pokemon
+      if (encounterVariant === MysteryEncounterVariant.BOSS_BATTLE) {
+        scene.playBgm(undefined);
+      }
       const availablePartyMembers = scene.getEnemyParty().filter(p => !p.isFainted()).length;
       scene.unshiftPhase(new SummonPhase(scene, 0, false));
       if (scene.currentBattle.double && availablePartyMembers > 1) {

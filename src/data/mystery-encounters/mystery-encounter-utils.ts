@@ -324,9 +324,6 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
       if (trainerType || trainerConfig) {
         battle.enemyParty[e] = battle.trainer.genPartyMember(e);
       } else {
-        // Normal pokemon loaded first, Bosses second
-        // If no species are specified, picks random
-
         if (e < partyConfig?.pokemonConfigs?.length) {
           const config = partyConfig?.pokemonConfigs?.[e];
           enemySpecies = config.species;
@@ -338,15 +335,6 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
           enemySpecies = scene.randomSpecies(battle.waveIndex, level, true);
         }
 
-        // if (normalCount - 1 >= e) {
-        //   enemySpecies = partyConfig?.pokemonSpecies?.[e];
-        // } else if (bossCount - 1 >= e - normalCount) {
-        //   scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.BOSS_BATTLE;
-        //   isBoss = true;
-        //   enemySpecies = partyConfig?.pokemonBosses?.[e];
-        // } else {
-        //   enemySpecies = scene.randomSpecies(battle.waveIndex, level, true);
-        // }
         battle.enemyParty[e] = scene.addEnemyPokemon(enemySpecies, level, TrainerSlot.NONE, isBoss);
       }
     }
@@ -444,7 +432,7 @@ export function showTrainerDialogue(scene: BattleScene): Promise<boolean> {
  * @param customShopRewards - adds a shop phase with the specified rewards / reward tiers
  * @param nonShopRewards - will add a non-shop reward phase for each specified item/modifier (can happen in addition to a shop)
  */
-export function setEncounterRewards(scene: BattleScene, customShopRewards?: CustomModifierSettings, nonShopRewards?: ModifierTypeFunc[]) {
+export function setCustomEncounterRewards(scene: BattleScene, customShopRewards?: CustomModifierSettings, nonShopRewards?: ModifierTypeFunc[]) {
   scene.currentBattle.mysteryEncounter.doEncounterRewards = (scene: BattleScene) => {
     if (customShopRewards) {
       scene.unshiftPhase(new SelectModifierPhase(scene, 0, null, customShopRewards));

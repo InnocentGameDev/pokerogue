@@ -1,7 +1,7 @@
 import BattleScene from "../../battle-scene";
 import { ModifierTier } from "#app/modifier/modifier-tier";
 import {modifierTypes} from "#app/modifier/modifier-type";
-import { EnemyPartyConfig, initBattleWithEnemyConfig, setEncounterRewards } from "#app/data/mystery-encounters/mystery-encounter-utils";
+import { EnemyPartyConfig, initBattleWithEnemyConfig, setCustomEncounterRewards } from "#app/data/mystery-encounters/mystery-encounter-utils";
 import { MysteryEncounterType } from "#enums/mystery-encounter-type";
 import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
 import { MysteryEncounterOptionBuilder } from "../mystery-encounter-option";
@@ -103,7 +103,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
       // Spawn standard trainer battle with memory mushroom reward
       const config: EnemyPartyConfig = encounter.enemyPartyConfigs[0];
 
-      setEncounterRewards(scene, { guaranteedModifierTypeFuncs: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM], fillRemaining: true });
+      setCustomEncounterRewards(scene, { guaranteedModifierTypeFuncs: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM], fillRemaining: true });
 
       return initBattleWithEnemyConfig(scene, config);
     })
@@ -114,7 +114,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
       // Spawn medium fight (standard strength) with ULTRA/GREAT reward (can improve with luck)
       const config: EnemyPartyConfig = encounter.enemyPartyConfigs[1];
 
-      setEncounterRewards(scene, { guaranteedModifierTiers: [ModifierTier.ULTRA, ModifierTier.GREAT], fillRemaining: true });
+      setCustomEncounterRewards(scene, { guaranteedModifierTiers: [ModifierTier.ULTRA, ModifierTier.GREAT], fillRemaining: true });
 
       return initBattleWithEnemyConfig(scene, config);
     })
@@ -125,7 +125,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
       // Spawn hard fight (125% standard strength) with ROGUE/ULTRA/GREAT reward (can improve with luck)
       const config: EnemyPartyConfig = encounter.enemyPartyConfigs[2];
 
-      setEncounterRewards(scene, { guaranteedModifierTiers: [ModifierTier.ROGUE, ModifierTier.ULTRA, ModifierTier.GREAT], fillRemaining: true });
+      setCustomEncounterRewards(scene, { guaranteedModifierTiers: [ModifierTier.ROGUE, ModifierTier.ULTRA, ModifierTier.GREAT], fillRemaining: true });
 
       return initBattleWithEnemyConfig(scene, config);
     })
