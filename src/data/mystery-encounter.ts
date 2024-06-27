@@ -215,11 +215,11 @@ export class MysteryEncounterBuilder implements Partial<MysteryEncounter> {
    * RARE 10/64 odds
    * SUPER_RARE 6/64 odds
    * ULTRA_RARE Not currently used
-   * @param encounterType
+   * @param encounterTier
    * @returns
    */
-  withEncounterTier(encounterType: MysteryEncounterTier): this & Required<Pick<MysteryEncounter, "encounterType">> {
-    return Object.assign(this, { encounterType: encounterType });
+  withEncounterTier(encounterTier: MysteryEncounterTier): this & Required<Pick<MysteryEncounter, "encounterTier">> {
+    return Object.assign(this, { encounterTier: encounterTier });
   }
 
   /**

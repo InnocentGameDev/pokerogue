@@ -338,7 +338,7 @@ export default class MysteryEncounterUiHandler extends UiHandler {
 
     // Rarity of encounter
     const ballType = getPokeballAtlasKey(mysteryEncounter.encounterTier as number);
-    this.rarityBall.setTexture(ballType, ballType);
+    this.rarityBall.setTexture("pb", ballType);
 
     const descriptionTextObject = addTextObject(this.scene, 6, 25, descriptionText, TextStyle.TOOLTIP_CONTENT, { wordWrap: { width: 830 } });
 

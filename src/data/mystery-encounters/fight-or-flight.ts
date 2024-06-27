@@ -7,7 +7,7 @@ import {
   setCustomEncounterRewards,
   showEncounterText
 } from "#app/data/mystery-encounters/mystery-encounter-utils";
-import MysteryEncounter, {MysteryEncounterBuilder} from "../mystery-encounter";
+import MysteryEncounter, {MysteryEncounterBuilder, MysteryEncounterTier} from "../mystery-encounter";
 import * as Utils from "../../utils";
 import {MysteryEncounterType} from "#enums/mystery-encounter-type";
 import {WaveCountRequirement} from "../mystery-encounter-requirements";
@@ -23,6 +23,7 @@ import {BattlerTagType} from "#enums/battler-tag-type";
 
 export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuilder()
   .withEncounterType(MysteryEncounterType.FIGHT_OR_FLIGHT)
+  .withEncounterTier(MysteryEncounterTier.COMMON)
   .withIntroSpriteConfigs([]) // Set in onInit()
   .withRequirement(new WaveCountRequirement([2, 180])) // waves 2 to 180
   .withCatchAllowed(true)

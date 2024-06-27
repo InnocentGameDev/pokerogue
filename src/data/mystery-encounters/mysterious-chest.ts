@@ -1,7 +1,7 @@
 import BattleScene from "../../battle-scene";
 import { ModifierTier } from "#app/modifier/modifier-tier";
 import { getHighestLevelPlayerPokemon, koPlayerPokemon, leaveEncounterWithoutBattle, setCustomEncounterRewards, showEncounterText } from "#app/data/mystery-encounters/mystery-encounter-utils";
-import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
+import MysteryEncounter, {MysteryEncounterBuilder, MysteryEncounterTier} from "../mystery-encounter";
 import * as Utils from "../../utils";
 import { MysteryEncounterType } from "#enums/mystery-encounter-type";
 import {WaveCountRequirement} from "../mystery-encounter-requirements";
@@ -11,6 +11,7 @@ import {Species} from "#enums/species";
 
 export const MysteriousChestEncounter: MysteryEncounter = new MysteryEncounterBuilder()
   .withEncounterType(MysteryEncounterType.MYSTERIOUS_CHEST)
+  .withEncounterTier(MysteryEncounterTier.COMMON)
   .withIntroSpriteConfigs([
     {
       spriteKey: Species.GIMMIGHOUL.toString(),

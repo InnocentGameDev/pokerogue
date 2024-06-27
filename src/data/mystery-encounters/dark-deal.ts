@@ -1,24 +1,25 @@
 import BattleScene from "../../battle-scene";
-import { AddPokeballModifierType } from "../../modifier/modifier-type";
+import {AddPokeballModifierType} from "../../modifier/modifier-type";
 import {
   EnemyPartyConfig,
-  initBattleWithEnemyConfig,
+  getRandomPlayerPokemon,
   getRandomSpeciesByEggTier,
-  leaveEncounterWithoutBattle,
-  getRandomPlayerPokemon
+  initBattleWithEnemyConfig,
+  leaveEncounterWithoutBattle
 } from "./mystery-encounter-utils";
-import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
+import MysteryEncounter, {MysteryEncounterBuilder, MysteryEncounterTier} from "../mystery-encounter";
 import {ModifierRewardPhase} from "#app/phases";
-import { getPokemonSpecies } from "../pokemon-species";
-import { MysteryEncounterType } from "#enums/mystery-encounter-type";
-import { PokeballType } from "../pokeball";
+import {getPokemonSpecies} from "../pokemon-species";
+import {MysteryEncounterType} from "#enums/mystery-encounter-type";
+import {PokeballType} from "../pokeball";
 import {PartySizeRequirement, WaveCountRequirement} from "../mystery-encounter-requirements";
-import { MysteryEncounterOptionBuilder } from "../mystery-encounter-option";
+import {MysteryEncounterOptionBuilder} from "../mystery-encounter-option";
 import {EggTier} from "#enums/egg-type";
 import {Type} from "#app/data/type";
 
 export const DarkDealEncounter: MysteryEncounter = new MysteryEncounterBuilder()
   .withEncounterType(MysteryEncounterType.DARK_DEAL)
+  .withEncounterTier(MysteryEncounterTier.ULTRA_RARE)
   .withIntroSpriteConfigs([
     {
       spriteKey: "mad_scientist_m",

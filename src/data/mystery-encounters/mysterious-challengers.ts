@@ -3,7 +3,7 @@ import { ModifierTier } from "#app/modifier/modifier-tier";
 import {modifierTypes} from "#app/modifier/modifier-type";
 import { EnemyPartyConfig, initBattleWithEnemyConfig, setCustomEncounterRewards } from "#app/data/mystery-encounters/mystery-encounter-utils";
 import { MysteryEncounterType } from "#enums/mystery-encounter-type";
-import MysteryEncounter, { MysteryEncounterBuilder } from "../mystery-encounter";
+import MysteryEncounter, {MysteryEncounterBuilder, MysteryEncounterTier} from "../mystery-encounter";
 import { MysteryEncounterOptionBuilder } from "../mystery-encounter-option";
 import { WaveCountRequirement } from "../mystery-encounter-requirements";
 import {
@@ -17,6 +17,7 @@ import {PartyMemberStrength} from "#enums/party-member-strength";
 
 export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncounterBuilder()
   .withEncounterType(MysteryEncounterType.MYSTERIOUS_CHALLENGERS)
+  .withEncounterTier(MysteryEncounterTier.UNCOMMON)
   .withIntroSpriteConfigs([]) // These are set in onInit()
   .withRequirement(new WaveCountRequirement([2, 180])) // waves 2 to 180
   .withOnInit((scene: BattleScene) => {
