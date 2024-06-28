@@ -14,21 +14,12 @@ import {
   ModifierTypeFunc,
   regenerateModifierPoolThresholds
 } from "../../modifier/modifier-type";
-import {
-  BattleEndPhase,
-  EggLapsePhase,
-  ModifierRewardPhase,
-  TrainerVictoryPhase
-} from "../../phases";
-import {
-  MysteryEncounterBattlePhase,
-  MysteryEncounterRewardsPhase
-} from "../../phases/mystery-encounter-phase";
+import {BattleEndPhase, EggLapsePhase, ModifierRewardPhase, TrainerVictoryPhase} from "../../phases";
+import {MysteryEncounterBattlePhase, MysteryEncounterRewardsPhase} from "../../phases/mystery-encounter-phase";
 import * as Utils from "../../utils";
-import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
 import {isNullOrUndefined} from "../../utils";
+import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
 import {TrainerType} from "#enums/trainer-type";
-import {EggTier} from "#enums/egg-type";
 import {Species} from "#enums/species";
 import {Type} from "#app/data/type";
 import {BattlerTagType} from "#enums/battler-tag-type";
@@ -196,39 +187,19 @@ export function showEncounterDialogue(scene: BattleScene, textContentKey: Templa
 
 /**
  *
- * Will pick lowest and highest of the starter costs for tiers provided, then return a random Species
  * NOTE: This returns ANY random species, including those locked behind eggs, etc.
- * @param scene
- * @param tiers
+ * @param starterTiers
+ * @param excludedSpecies
  * @param types
  * @returns
  */
-export function getRandomSpeciesByEggTier(scene: BattleScene, tiers: EggTier[], types?: Type[]): Species {
-  let values: number[] = [];
-  tiers.forEach((tier) => {
-    switch (tier) {
-    case EggTier.COMMON:
-      values = values.concat([0, 3]);
-      break;
-    case EggTier.GREAT:
-      values = values.concat([4, 5]);
-      break;
-    case EggTier.ULTRA:
-      values = values.concat([6, 7]);
-      break;
-    case EggTier.MASTER:
-      values = values.concat([8, 10]);
-      break;
-    }
-  });
-  values.sort((a, b) => a - b);
-  const min = values[0];
-  const max = values[values.length - 1];
+export function getRandomSpeciesByStarterTier(starterTiers: number | [number, number], excludedSpecies?: Species[], types?: Type[]): Species {
+  let min = starterTiers instanceof Array ? starterTiers[0] : starterTiers;
+  let max = starterTiers instanceof Array ? starterTiers[1] : starterTiers;
 
   let filteredSpecies = Object.entries(speciesStarters)
-    .filter(s => s[1] >= min && s[1] <= max)
     .map(s => parseInt(s[0]))
-    .filter(s => getPokemonSpecies(s));
+    .filter(s => getPokemonSpecies(s) && !excludedSpecies.includes(s));
 
   if (!isNullOrUndefined(types) && types.length > 0) {
     filteredSpecies = filteredSpecies.filter(s => {
@@ -237,13 +208,30 @@ export function getRandomSpeciesByEggTier(scene: BattleScene, tiers: EggTier[], 
     });
   }
 
-  const index = Utils.randSeedInt(filteredSpecies.length);
-  return Phaser.Math.RND.shuffle(filteredSpecies)[index];
+  // If no filtered mons exist at specified starter tier, will expand starter search range until there are
+  let tryFilterStarterTiers = filteredSpecies.filter(s => s[1] >= min && s[1] <= max);
+  while (tryFilterStarterTiers.length === 0 || !(min === 0 && max === 10)) {
+    if (min > 0) {
+      min--;
+    } else {
+      max++;
+    }
+
+    tryFilterStarterTiers = filteredSpecies.filter(s => s[1] >= min && s[1] <= max);
+  }
+
+  if (tryFilterStarterTiers.length > 0) {
+    const index = Utils.randSeedInt(tryFilterStarterTiers.length);
+    return Phaser.Math.RND.shuffle(tryFilterStarterTiers)[index];
+  }
+
+  return Species.BULBASAUR;
 }
 
 export class EnemyPokemonConfig {
   species: PokemonSpecies;
   isBoss: boolean = false;
+  formIndex?: number;
   tags?: BattlerTagType[];
 }
 
@@ -253,8 +241,6 @@ export class EnemyPartyConfig {
   trainerType?: TrainerType; // Generates trainer battle solely off trainer type
   trainerConfig?: TrainerConfig; // More customizable option for configuring trainer battle
   pokemonConfigs?: EnemyPokemonConfig[];
-  // pokemonSpecies?: PokemonSpecies[];
-  // pokemonBosses?: PokemonSpecies[];
   female?: boolean; // True for female trainer, false for male
 }
 
@@ -319,11 +305,11 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
 
   battle.enemyLevels.forEach((level, e) => {
     let enemySpecies;
-    let isBoss = false;
     if (!loaded) {
       if (trainerType || trainerConfig) {
         battle.enemyParty[e] = battle.trainer.genPartyMember(e);
       } else {
+        let isBoss = false;
         if (e < partyConfig?.pokemonConfigs?.length) {
           const config = partyConfig?.pokemonConfigs?.[e];
           enemySpecies = config.species;
@@ -340,9 +326,6 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
     }
 
     const enemyPokemon = scene.getEnemyParty()[e];
-    if (isBoss) {
-      enemyPokemon.setBoss(true, scene.getEncounterBossSegments(scene.currentBattle.waveIndex, level, enemySpecies, true));
-    }
 
     if (e < (doubleBattle ? 2 : 1)) {
       enemyPokemon.setX(-66 + enemyPokemon.getFieldPositionOffset()[0]);
@@ -353,12 +336,27 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
       scene.gameData.setPokemonSeen(enemyPokemon, true, !!(trainerType || trainerConfig));
     }
 
-    if (e < partyConfig?.pokemonConfigs?.length && partyConfig?.pokemonConfigs?.[e].tags?.length > 0) {
-      const tags = partyConfig?.pokemonConfigs?.[e].tags;
-      tags.forEach(tag => enemyPokemon.addTag(tag));
+    if (e < partyConfig?.pokemonConfigs?.length) {
+      const config = partyConfig?.pokemonConfigs?.[e];
 
-      // Requires re-priming summon data so that tags are not cleared on SummonPhase
-      enemyPokemon.primeSummonData(enemyPokemon.summonData);
+      // Set form
+      if (!isNullOrUndefined(config.formIndex)) {
+        enemyPokemon.formIndex = config.formIndex;
+      }
+
+      // Set Boss
+      if (config.isBoss) {
+        enemyPokemon.setBoss(true, scene.getEncounterBossSegments(scene.currentBattle.waveIndex, level, enemySpecies, true));
+      }
+
+      // Set tags
+      if (config.tags?.length > 0) {
+        const tags = partyConfig?.pokemonConfigs?.[e].tags;
+        tags.forEach(tag => enemyPokemon.addTag(tag));
+
+        // Requires re-priming summon data so that tags are not cleared on SummonPhase
+        enemyPokemon.primeSummonData(enemyPokemon.summonData);
+      }
     }
 
     loadEnemyAssets.push(enemyPokemon.loadAssets());

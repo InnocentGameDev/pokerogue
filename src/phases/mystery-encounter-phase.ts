@@ -28,7 +28,7 @@ export class MysteryEncounterPhase extends Phase {
 
     // Sets flag that ME was encountered
     // Can be used in later MEs to check for requirements to spawn
-    this.scene.mysteryEncounterFlags.encounteredEvents.push(this.scene.currentBattle.mysteryEncounter.encounterType);
+    this.scene.mysteryEncounterFlags.encounteredEvents.push([this.scene.currentBattle.mysteryEncounter.encounterType, this.scene.currentBattle.mysteryEncounter.encounterTier]);
 
     // Initiates encounter dialogue window and option select
     this.scene.ui.setMode(Mode.MYSTERY_ENCOUNTER);

@@ -782,6 +782,22 @@ export class EncounterPhase extends BattlePhase {
 
     const battle = this.scene.currentBattle;
 
+    // Init Mystery Encounter if there is one
+    const mysteryEncounter = battle.mysteryEncounter;
+    if (mysteryEncounter) {
+      // If ME has an onInit() function, call it
+      // Usually used for calculating rand data before initializing anything visual
+      this.scene.executeWithSeedOffset(() => {
+        if (mysteryEncounter.onInit) {
+          mysteryEncounter.onInit(this.scene);
+        }
+      }, this.scene.currentBattle.waveIndex);
+
+      // Add intro visuals for mystery encounter
+      mysteryEncounter.initIntroVisuals(this.scene);
+      this.scene.field.add(mysteryEncounter.introVisuals);
+    }
+
     let totalBst = 0;
 
     battle.enemyLevels.forEach((level, e) => {
@@ -1218,7 +1234,6 @@ export class NewBiomeEncounterPhase extends NextEncounterPhase {
     if (mysteryEncounter) {
       moveTargets.push(mysteryEncounter);
     }
-
 
     this.scene.tweens.add({
       targets: moveTargets.flat(),

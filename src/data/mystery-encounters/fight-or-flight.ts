@@ -25,7 +25,7 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
   .withEncounterType(MysteryEncounterType.FIGHT_OR_FLIGHT)
   .withEncounterTier(MysteryEncounterTier.COMMON)
   .withIntroSpriteConfigs([]) // Set in onInit()
-  .withRequirement(new WaveCountRequirement([2, 180])) // waves 2 to 180
+  .withRequirement(new WaveCountRequirement([10, 180])) // waves 10 to 180
   .withCatchAllowed(true)
   .withHideWildIntroMessage(true)
   .withOnInit((scene: BattleScene) => {
