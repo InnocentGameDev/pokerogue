@@ -1,24 +1,23 @@
 # 📝 Most immediate things to-do list
 
 - ### High priority
-    - 🐛 Picking up certain items in Fight or Flight is still broken. Workaround is leave encounter.
-    - 🐛 Modifiers that are applied to pokemon get skipped in Fight or Flight.
+    - 🐛 [Should be fixed] Picking up certain items in Fight or Flight is still broken. Workaround is leave encounter. 
+    - 🐛 [Should be fixed] Modifiers that are applied to pokemon get skipped in Fight or Flight.
+    - ⚙️ Dark deal boss fight should have rewards phase to allow for healing after it 🛠️
+    - ⚖️ Determine whether Dark Deal should exclude egg-locked mythicals from pool (mew, deoxys, manaphy, etc.) 🛠️
 
 - ### Medium priority
-    - 🐛 Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app
-    - 🐛 Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
-    - ⚙️ "Omniboost" functionality (Fight or Flight ME) 🛠️
-    - ⚙️ Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs 🛠️
-      - ⚙️ Hardcode that the same ME can't happen twice in a row -- boring and sometimes too rough 🛠️
+    - 🐛 [Should be fixed] Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app
+    - 🐛 [Should be fixed] Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
+    - ⚙️ Boss gets +1 to all stats if it catches you stealing (Fight or Flight ME) ️✔️
+    - ⚙️ Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs ️✔️
+    - ⚙️ Hardcode that the same ME can't happen twice in a row -- boring and sometimes too rough 🛠️
 
 - ### Low priority
-    - 🐛 Mysterious Challengers can spawn two trainers (or three) of the same type
+    - 🐛 Mysterious Challengers can spawn two trainers (or three) of the same type [Dev comment: not a bug]
     - 🐛 Fight or Flight intro visuals may show different gender from the actual spawned pokemon
-    - 🐛 Tooltip bug in Events. When showing the tooltip of the 2nd or later Event you've found, the tooltip for the first option will match whatever option you selected in the previous Event. This wrong tooltip gets overriden once you move the cursor.
+    - 🐛 [Should be fixed] Tooltip bug in Events. When showing the tooltip of the 2nd or later Event you've found, the tooltip for the first option will match whatever option you selected in the previous Event. This wrong tooltip gets overriden once you move the cursor.
       - Example: if you chose the hardest battle in Mysterious Challenger, and then roll into a 'Fight or Flight' Event, the option 'Fight' will show 'Brutal Battle, Great Reward'.
-    - ⚖️ Lower waves "Fight of Flight" mons are sometimes too easy -- lvl 3 Wurmple at floor 4. Lvl 8 Combee at floor 11.
-        - Sometimes they can be pretty ridiculous (lvl 18 boss early into biome 2)
-        - Note: Levels have been tweaked recently, so further test is needed
 
 
 # 📝 Things to be done before Mystery Encounters ("MEs/Events") MVP is finished:
@@ -26,11 +25,11 @@
 
 - ## Bugless implementation of the MVP MEs
   - Establish placeholder waves for MEs to happen ✔️
-  - Bug-ish implementation of Common ME 1 ('Mysterious Chest')✔️
-  - Bug-ish implementation of Common ME 2 ('Fight or Flight')✔️
-  - Bug-ish implementation of Rare ME 1 ('Mysterious Challenger')✔️
-  - Bug-ish implementation of Rare ME 2 ('Sleeping Snorlax') 🛠️
-  - Bug-ish implementation of Legendary ME 1 ('Dark Deal') ✔️
+  - Bug-free implementation of Common ME 1 ('Mysterious Chest')✔️
+  - Bug-free implementation of Common ME 2 ('Fight or Flight')✔️
+  - Bug-free implementation of Rare ME 1 ('Mysterious Challenger')✔️
+  - Bug-free implementation of Rare ME 2 ('Sleeping Snorlax') 🛠️
+  - Bug-free implementation of Legendary ME 1 ('Dark Deal') ✔️
 
 - ## First round of playtesting (Alpha)
   - Establish a placeholder odd for MEs to happen closer to real implementation ❌
