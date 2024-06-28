@@ -1,17 +1,15 @@
 # 📝 Most immediate things to-do list
 
 - ### High priority
-    - 🐛 [Should be fixed] Picking up certain items in Fight or Flight is still broken. Workaround is leave encounter. 
-    - 🐛 [Should be fixed] Modifiers that are applied to pokemon get skipped in Fight or Flight.
-    - ⚙️ Dark deal boss fight should have rewards phase to allow for healing after it 🛠️
-    - ⚖️ Determine whether Dark Deal should exclude egg-locked mythicals from pool (mew, deoxys, manaphy, etc.) 🛠️
+    - 🐛 [Should be fixed] MEs calculate what's happening before Biome loads, which means potential bugs on floor changes (11, 21...)
+    - ⚙️ Add a tag system so MEs don't show where they shouldn't and bricking Challenge runs:
+      - noChallenge (cant be spawned in challenge runs)
+      - allChallenge (can spawn in all challenge modes)
+      - (typespecific)Challenge: 
+        - Example: fireOnly (can only spawn in fire related challenges)
 
 - ### Medium priority
-    - 🐛 [Should be fixed] Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app
-    - 🐛 [Should be fixed] Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight
-    - ⚙️ Boss gets +1 to all stats if it catches you stealing (Fight or Flight ME) ️✔️
-    - ⚙️ Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs ️✔️
-    - ⚙️ Hardcode that the same ME can't happen twice in a row -- boring and sometimes too rough 🛠️
+    - ⚙️ [Complete] Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs ✔️
 
 - ### Low priority
     - 🐛 Mysterious Challengers can spawn two trainers (or three) of the same type [Dev comment: not a bug]
@@ -21,25 +19,55 @@
 
 
 # 📝 Things to be done before Mystery Encounters ("MEs/Events") MVP is finished:
-  All the things on this list should be done before the merge as a MVP (Minimum Viable Product) release.
+  All the things on this list should be done before an MVP (Minimum Viable Product) can be playtested.
 
 - ## Bugless implementation of the MVP MEs
   - Establish placeholder waves for MEs to happen ✔️
-  - Bug-free implementation of Common ME 1 ('Mysterious Chest')✔️
-  - Bug-free implementation of Common ME 2 ('Fight or Flight')✔️
-  - Bug-free implementation of Rare ME 1 ('Mysterious Challenger')✔️
-  - Bug-free implementation of Rare ME 2 ('Sleeping Snorlax') 🛠️
-  - Bug-free implementation of Legendary ME 1 ('Dark Deal') ✔️
+  - ⚪ Bug-free implementation of Common ME 1 ('Mysterious Chest')✔️
+  - ⚪ Bug-free implementation of Common ME 2 ('Fight or Flight')✔️
+  - 🔵 Bug-free implementation of Rare ME 1 ('Mysterious Challenger')✔️
+  - 🔵 Bug-free implementation of Rare ME 2 ('Sleeping Snorlax') 🛠️
+  - 🟣 Bug-free implementation of Epic ME 1 ('Training Session') 🛠️
+  - 🟡 Bug-free implementation of Legendary ME 1 ('Dark Deal') ✔️
 
 - ## First round of playtesting (Alpha)
-  - Establish a placeholder odd for MEs to happen closer to real implementation ❌
-  - Find and eliminate as many bugs as possible 🛠️
-  - Tweak odds of ME spawn if needed ❌
+  - First round of feedback on bugs for more slippery bugs 🛠️
+  - First round of balance feedback on odds and power-level 🛠️
   - Tweak difficulty/rewards balance in MEs 🛠️
 
   ## Translation of MEs after playtest/balance
+  - First round of translators feedback to avoid potential issues 🛠️
   - EN localisation 🛠️
   - ES localisation 🛠️
+
+# 📝 Things to be done before Mystery Encounters ("MEs/Events") goes __live__:
+  All the things on this list should be done before the merge to main.
+
+- ## Bugless implementation of the MVP MEs
+  - Bugless implementation of about 55-60 MEs
+    - 20 non-biome-dependant:
+      - ⚪ 9 Common Events 
+      - 🔵 5 Rare Events
+      - 🟣 4 Epic Events
+      - 🟡 2 Legendary Events
+    - 35-40 biome-dependant Events, at least one for each biome
+
+- ## Second round of playtesting (Beta)
+  - Second round of feedback for bugs ❌
+  - Second round of balance feedback ❌
+  - Final decisions on balance, powerlevel, odds and design choices before live feedback ❌
+
+  ## Translation of MEs after playtest/balance
+  - de localisation     🛠️
+  - en localisation     🛠️
+  - es-ES localisation  🛠️
+  - es-MX localisation  🛠️
+  - fr localisation     🛠️
+  - it localisation     🛠️
+  - ko localisation     🛠️
+  - pt-BR localisation  🛠️
+  - zh-CN localisation  🛠️
+  - zh-TW localisation  🛠️
 
 
 # 🧬 Deep dive into Events and what has been done so far
@@ -163,3 +191,12 @@ Events (referred to as 'Mysterious Encounters, MEs' in the code) aim to be an ad
 - Allowed catch in "Fight or Flight" -- it was counterintuitive to not allow it as it __is__ a wild PKMN fight.
 - More minor 🐛 squashed.
 - Pushed Dark Deal ME to a higher wave requirement (+30) as it seems to be functioning (mostly) bugless.
+
+## 27-29th June
+- The 🐛 "Picking up certain items in Fight or Flight works poorly" has been squashed.
+- The 🐛 "Modifiers that are applied to pokemon get skipped in Fight or Flight" has been squashed.
+- ⚙️ Added "Omniboost" functionality (Fight or Flight ME) 
+- The 🐛 "Wave seed generates different encounter data if you roll to a new wave, see the spawned stuff, and refresh the app" has been squashed.
+- The 🐛 "Type-buffing items (like Silk Scarf) get swapped around when offered as a reward in Fight or Flight" has been squashed.
+- ⚖️ Adjusted Dark Deal odds to show 6-7 cost PKMNs at a much higher rate (70%) than 8-cost (20%) or 9-cost (10%), to avoid box legendaries being overly present.
+- The 🐛 about "Tooltips being remembered from the previous ME choice until you hovered a different option" is squashed.
