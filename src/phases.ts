@@ -854,9 +854,11 @@ export class EncounterPhase extends BattlePhase {
     } else if (battle.battleType === BattleType.MYSTERY_ENCOUNTER) {
       loadEnemyAssets.push(battle.mysteryEncounter.introVisuals.loadAssets().then(() => battle.mysteryEncounter.introVisuals.initSprite()));
     } else {
+      // This block only applies for double battles to init the boss segments (idk why it's split up like this)
       if (battle.enemyParty.filter(p => p.isBoss()).length > 1) {
         for (const enemyPokemon of battle.enemyParty) {
-          if (enemyPokemon.isBoss()) {
+          // If the enemy pokemon is a boss and wasn't populated from data source, then set it up
+          if (enemyPokemon.isBoss() && !enemyPokemon.isPopulatedFromDataSource) {
             enemyPokemon.setBoss(true, Math.ceil(enemyPokemon.bossSegments * (enemyPokemon.getSpeciesForm().baseTotal / totalBst)));
             enemyPokemon.initBattleInfo();
           }
@@ -3009,8 +3011,7 @@ export class MoveEffectPhase extends PokemonPhase {
       const targetHitChecks = Object.fromEntries(targets.map(p => [p.getBattlerIndex(), this.hitCheck(p)]));
       const activeTargets = targets.map(t => t.isActive(true));
       if (!activeTargets.length || (!move.hasAttr(VariableTargetAttr) && !move.isMultiTarget() && !targetHitChecks[this.targets[0]])) {
-        user.turnData.hitCount = 1;
-        user.turnData.hitsLeft = 1;
+        this.stopMultiHit();
         if (activeTargets.length) {
           this.scene.queueMessage(getPokemonMessage(user, "'s\nattack missed!"));
           moveHistoryEntry.result = MoveResult.MISS;
@@ -3029,8 +3030,7 @@ export class MoveEffectPhase extends PokemonPhase {
       new MoveAnim(move.id as Moves, user, this.getTarget()?.getBattlerIndex()).play(this.scene, () => {
         for (const target of targets) {
           if (!targetHitChecks[target.getBattlerIndex()]) {
-            user.turnData.hitCount = 1;
-            user.turnData.hitsLeft = 1;
+            this.stopMultiHit(target);
             this.scene.queueMessage(getPokemonMessage(user, "'s\nattack missed!"));
             if (moveHistoryEntry.result === MoveResult.PENDING) {
               moveHistoryEntry.result = MoveResult.MISS;
@@ -3042,6 +3042,7 @@ export class MoveEffectPhase extends PokemonPhase {
           const isProtected = !this.move.getMove().checkFlag(MoveFlags.IGNORE_PROTECT, user, target) && target.findTags(t => t instanceof ProtectedTag).find(t => target.lapseTag(t.tagType));
 
           const firstHit = (user.turnData.hitsLeft === user.turnData.hitCount);
+          const firstTarget = (moveHistoryEntry.result === MoveResult.PENDING);
 
           if (firstHit) {
             user.pushMoveHistory(moveHistoryEntry);
@@ -3075,8 +3076,8 @@ export class MoveEffectPhase extends PokemonPhase {
                           target.addTag(BattlerTagType.FLINCHED, undefined, this.move.moveId, user.id);
                         }
                       }
-                      Utils.executeIf(!isProtected && !chargeEffect, () => applyFilteredMoveAttrs((attr: MoveAttr) => attr instanceof MoveEffectAttr && (attr as MoveEffectAttr).trigger === MoveEffectTrigger.HIT && (!attr.firstHitOnly || firstHit) && (!attr.lastHitOnly || lastHit),
-                        user, target, this.move.getMove()).then(() => {
+                      Utils.executeIf(!isProtected && !chargeEffect, () => applyFilteredMoveAttrs((attr: MoveAttr) => attr instanceof MoveEffectAttr && (attr as MoveEffectAttr).trigger === MoveEffectTrigger.HIT
+                          && (!attr.firstHitOnly || firstHit) && (!attr.lastHitOnly || lastHit) && (!attr.firstTargetOnly || firstTarget), user, target, this.move.getMove()).then(() => {
                         return Utils.executeIf(!target.isFainted() || target.canApplyAbility(), () => applyPostDefendAbAttrs(PostDefendAbAttr, target, user, this.move.getMove(), hitResult).then(() => {
                           if (!user.isPlayer() && this.move.getMove() instanceof AttackMove) {
                             user.scene.applyShuffledModifiers(this.scene, EnemyAttackStatusEffectChanceModifier, false, target);
@@ -3233,6 +3234,28 @@ export class MoveEffectPhase extends PokemonPhase {
 
   getTarget(): Pokemon {
     return this.getTargets().find(() => true);
+  }
+
+  removeTarget(target: Pokemon): void {
+    const targetIndex = this.targets.findIndex(ind => ind === target.getBattlerIndex());
+    if (targetIndex !== -1) {
+      this.targets.splice(this.targets.findIndex(ind => ind === target.getBattlerIndex()), 1);
+    }
+  }
+
+  stopMultiHit(target?: Pokemon): void {
+    /** If given a specific target, remove the target from subsequent strikes */
+    if (target) {
+      this.removeTarget(target);
+    }
+    /**
+     * If no target specified, or the specified target was the last of this move's
+     * targets, completely cancel all subsequent strikes.
+    */
+    if (!target || this.targets.length === 0 ) {
+      this.getUserPokemon().turnData.hitCount = 1;
+      this.getUserPokemon().turnData.hitsLeft = 1;
+    }
   }
 
   getNewHitPhase() {
