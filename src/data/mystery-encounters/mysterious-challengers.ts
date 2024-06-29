@@ -103,7 +103,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
       // Spawn standard trainer battle with memory mushroom reward
       const config: EnemyPartyConfig = encounter.enemyPartyConfigs[0];
 
-      setCustomEncounterRewards(scene, { guaranteedModifierTypeFuncs: [modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM, modifierTypes.MEMORY_MUSHROOM], fillRemaining: true });
+      setCustomEncounterRewards(scene, { guaranteedModifierTypeFuncs: [modifierTypes.TM_COMMON, modifierTypes.TM_GREAT, modifierTypes.MEMORY_MUSHROOM], fillRemaining: true });
 
       return initBattleWithEnemyConfig(scene, config);
     })

@@ -45,7 +45,7 @@ export const mysteryEncounter: SimpleTranslationEntries = {
   "mysterious_challengers_description": "If you defeat a challenger, you might impress them enough to receive a boon. But some look tough, are you up to the challenge?",
   "mysterious_challengers_query": "Who will you battle?",
   "mysterious_challengers_option_1_label": "A clever, mindful foe",
-  "mysterious_challengers_option_1_tooltip": "(+) Standard Battle\n(+) Memory Mushroom",
+  "mysterious_challengers_option_1_tooltip": "(+) Standard Battle\n(+) Move Item Rewards",
   "mysterious_challengers_option_2_label": "A strong foe",
   "mysterious_challengers_option_2_tooltip": "(+) Hard Battle\n(+) Good Rewards",
   "mysterious_challengers_option_3_label": "The mightiest foe",
