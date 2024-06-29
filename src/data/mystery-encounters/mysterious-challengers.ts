@@ -41,7 +41,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
     // Number of mons is based off wave: 1-20 is 2, 20-40 is 3, etc. capping at 6 after wave 100
     const hardTrainerType = scene.arena.randomTrainerType(scene.currentBattle.waveIndex);
     const hardTemplate = new TrainerPartyCompoundTemplate(
-      new TrainerPartyTemplate(1, PartyMemberStrength.STRONG, false, true),
+      new TrainerPartyTemplate(1, PartyMemberStrength.STRONGER, false, true),
       new TrainerPartyTemplate(Math.min(Math.ceil(scene.currentBattle.waveIndex / 20), 5), PartyMemberStrength.AVERAGE, false, true));
     const hardConfig = trainerConfigs[hardTrainerType].copy();
     hardConfig.setPartyTemplates(hardTemplate);
@@ -52,7 +52,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
     const hardSpriteKey = hardConfig.getSpriteKey(female, hardConfig.doubleOnly);
     instance.enemyPartyConfigs.push({
       trainerConfig: hardConfig,
-      levelAdditiveMultiplier: 0.75,
+      levelAdditiveMultiplier: 0.5,
       female: female,
     });
 
@@ -70,7 +70,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
     const brutalSpriteKey = brutalConfig.getSpriteKey(female, brutalConfig.doubleOnly);
     instance.enemyPartyConfigs.push({
       trainerConfig: brutalConfig,
-      levelAdditiveMultiplier: 1,
+      levelAdditiveMultiplier: 0.85,
       female: female
     });
 
@@ -100,7 +100,6 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
   .withOption(new MysteryEncounterOptionBuilder()
     .withOptionPhase(async (scene: BattleScene) => {
       const encounter = scene.currentBattle.mysteryEncounter;
-
       // Spawn standard trainer battle with memory mushroom reward
       const config: EnemyPartyConfig = encounter.enemyPartyConfigs[0];
 
@@ -112,7 +111,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
   .withOption(new MysteryEncounterOptionBuilder()
     .withOptionPhase(async (scene: BattleScene) => {
       const encounter = scene.currentBattle.mysteryEncounter;
-      // Spawn medium fight (standard strength) with ULTRA/GREAT reward (can improve with luck)
+      // Spawn hard fight with ULTRA/GREAT reward (can improve with luck)
       const config: EnemyPartyConfig = encounter.enemyPartyConfigs[1];
 
       setCustomEncounterRewards(scene, { guaranteedModifierTiers: [ModifierTier.ULTRA, ModifierTier.GREAT], fillRemaining: true });
@@ -123,8 +122,11 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
   .withOption(new MysteryEncounterOptionBuilder()
     .withOptionPhase(async (scene: BattleScene) => {
       const encounter = scene.currentBattle.mysteryEncounter;
-      // Spawn hard fight (125% standard strength) with ROGUE/ULTRA/GREAT reward (can improve with luck)
+      // Spawn brutal fight with ROGUE/ULTRA/GREAT reward (can improve with luck)
       const config: EnemyPartyConfig = encounter.enemyPartyConfigs[2];
+
+      // To avoid player level snowballing from picking this option
+      encounter.expMultiplier = 0.8;
 
       setCustomEncounterRewards(scene, { guaranteedModifierTiers: [ModifierTier.ROGUE, ModifierTier.ULTRA, ModifierTier.GREAT], fillRemaining: true });
 

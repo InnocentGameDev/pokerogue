@@ -3962,9 +3962,10 @@ export class VictoryPhase extends PokemonPhase {
 
     if (participantIds.size) {
       let expValue = this.getPokemon().getExpValue();
-      // TODO: should ME trainer battles give more exp?
       if (this.scene.currentBattle.battleType === BattleType.TRAINER) {
         expValue = Math.floor(expValue * 1.5);
+      } else if (this.scene.currentBattle.battleType === BattleType.MYSTERY_ENCOUNTER) {
+        expValue = Math.floor(expValue * this.scene.currentBattle.mysteryEncounter.expMultiplier);
       }
       for (const partyMember of nonFaintedPartyMembers) {
         const pId = partyMember.id;

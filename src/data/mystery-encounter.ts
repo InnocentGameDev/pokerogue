@@ -49,25 +49,17 @@ export default interface MysteryEncounter {
    * Dialogue object containing all the dialogue, messages, tooltips, etc. for an encounter
    */
   dialogue?: MysteryEncounterDialogue;
-
   /**
    * Data used for setting up/initializing enemy party in battles
    * Can store multiple configs so that one can be chosen based on option selected
    */
   enemyPartyConfigs?: EnemyPartyConfig[];
-
   /**
    * Object instance containing sprite data for an encounter when it is being spawned
    * Otherwise, will be undefined
    * You probably shouldn't do anything with this unless you have a very specific need
    */
   introVisuals?: MysteryEncounterIntroVisuals;
-
-  /**
-   * Generic property to set any custom data required for the encounter
-   */
-  misc?: any;
-
 
   /**
    * Flags
@@ -78,31 +70,37 @@ export default interface MysteryEncounter {
    * Example use: see MYSTERIOUS_CHEST
    */
   dialogueTokens?: [RegExp, string][];
-
   /**
    * Should be set depending upon option selected as part of an encounter
    * For example, if there is no battle as part of the encounter/selected option, should be set to NO_BATTLE
    * Defaults to DEFAULT
    */
   encounterVariant?: MysteryEncounterVariant;
-
   /**
    * Flag for checking if it's the first time a shop is being shown for an encounter.
    * Defaults to true so that the first shop does not override the specified rewards.
    * Will be set to false after a shop is shown (so can't reroll same rarity items for free)
    */
   lockEncounterRewardTiers?: boolean;
-
   /**
    * Will be set by option select handlers automatically, and can be used to refer to which option was chosen by later phases
    */
   selectedOption?: MysteryEncounterOption;
-
   /**
    * Can be set to true or false depending on the type of encounter
    * Defaults to false
    */
   catchAllowed?: boolean;
+  /**
+   * Can be set higher or lower based on the type of battle or exp gained for an option/encounter
+   * Defaults to 1
+   */
+  expMultiplier?: number;
+
+  /**
+   * Generic property to set any custom data required for the encounter
+   */
+  misc?: any;
 }
 
 /**
@@ -127,6 +125,7 @@ export default class MysteryEncounter implements MysteryEncounter {
     this.enemyPartyConfigs = [];
     this.introVisuals = null;
     this.misc = null;
+    this.expMultiplier = 1;
   }
 
   /**

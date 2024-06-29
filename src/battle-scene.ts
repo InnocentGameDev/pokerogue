@@ -83,8 +83,8 @@ import { Species } from "#enums/species";
 import { UiTheme } from "#enums/ui-theme";
 import { TimedEventManager } from "#app/timed-event-manager.js";
 import MysteryEncounter, { MysteryEncounterTier, MysteryEncounterVariant } from "./data/mystery-encounter";
-import { MysteryEncounterFlags } from "./data/mystery-encounter-flags";
-import { allMysteryEncounters } from "./data/mystery-encounters/mystery-encounters";
+import {allMysteryEncounters, BASE_MYSTYERY_ENCOUNTER_WEIGHT} from "./data/mystery-encounters/mystery-encounters";
+import {MysteryEncounterFlags} from "#app/data/mystery-encounter-flags";
 
 export const bypassLogin = import.meta.env.VITE_BYPASS_LOGIN === "1";
 
@@ -1206,9 +1206,8 @@ export default class BattleScene extends SceneBase {
         const roll = Utils.randSeedInt(256);
 
         // Base spawn weight is 4/256, and increases by 1/256 for each missed attempt at spawning an encounter on a valid floor
-        // TODO: reset spawn weight to 4, 90 is for test branch
-        const baseSpawnWeight = 90;
-        const sessionEncounterRate = !isNullOrUndefined(this.mysteryEncounterFlags?.encounterSpawnChance) ? this.mysteryEncounterFlags.encounterSpawnChance : baseSpawnWeight;
+        // TODO: reset BASE_MYSTYERY_ENCOUNTER_WEIGHT to 4, 90 is for test branch
+        const sessionEncounterRate = !isNullOrUndefined(this.mysteryEncounterFlags?.encounterSpawnChance) ? this.mysteryEncounterFlags.encounterSpawnChance : BASE_MYSTYERY_ENCOUNTER_WEIGHT;
 
         // If total number of encounters is lower than expected for the run, slightly favor a new encounter spawn
         // Do the reverse as well
@@ -1222,7 +1221,7 @@ export default class BattleScene extends SceneBase {
         if (roll < successRate) {
           newBattleType = BattleType.MYSTERY_ENCOUNTER;
           // Reset base spawn weight
-          this.mysteryEncounterFlags.encounterSpawnChance = baseSpawnWeight;
+          this.mysteryEncounterFlags.encounterSpawnChance = BASE_MYSTYERY_ENCOUNTER_WEIGHT;
         } else {
           this.mysteryEncounterFlags.encounterSpawnChance = sessionEncounterRate + 1;
         }
