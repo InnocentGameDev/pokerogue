@@ -2748,50 +2748,55 @@ export default class BattleScene extends SceneBase {
       encounter = override?.encounterType >= 0 ? allMysteryEncounters[override?.encounterType] : null;
     }
 
-    // Generate new encounter if no overrides
-    if (!encounter) {
-      // Common / Uncommon / Rare / Super Rare
-      const tierWeights = [34, 16, 11, 3];
-
-      // Adjust tier weights by currently encountered events (pity system that lowers odds of only common/uncommons in run)
-      this.mysteryEncounterFlags.encounteredEvents.forEach(val => {
-        const tier = val[1];
-        if (tier === MysteryEncounterTier.COMMON) {
-          tierWeights[0] = tierWeights[0] - 3;
-        } else if (tier === MysteryEncounterTier.UNCOMMON) {
-          tierWeights[1] = tierWeights[1] - 2;
-        }
-      });
-
-      const totalWeight = tierWeights.reduce((a, b) => a + b);
-      const tierValue = Utils.randSeedInt(totalWeight);
-      const commonThreshold = totalWeight - tierWeights[0];
-      const uncommonThreshold = totalWeight - tierWeights[0] - tierWeights[1];
-      const rareThreshold = totalWeight - tierWeights[0] - tierWeights[1] - tierWeights[2];
-      let tier = tierValue > commonThreshold ? MysteryEncounterTier.COMMON : tierValue > uncommonThreshold ? MysteryEncounterTier.UNCOMMON : tierValue > rareThreshold ? MysteryEncounterTier.RARE : MysteryEncounterTier.SUPER_RARE;
-      let availableEncounters = [];
-
-      // New encounter will never be the same as the most recent encounter
-      const previousEncounterType = this.mysteryEncounterFlags.encounteredEvents?.length > 0 ? this.mysteryEncounterFlags.encounteredEvents[this.mysteryEncounterFlags.encounteredEvents.length - 1][0] : null;
-      // If no valid encounters exist at tier, checks next tier down, continuing until there are some encounters available
-      while (availableEncounters.length === 0 && tier >= 0) {
-        availableEncounters = allMysteryEncounters.filter((encounter) =>
-          encounter?.meetsRequirements(this) && encounter.encounterTier === tier && (!previousEncounterType || encounter.encounterType !== previousEncounterType));
-
-        tier--;
-      }
-
-      // If absolutely no encounters are available, spawn 0th encounter (mysterious trainers)
-      if (availableEncounters.length === 0) {
-        return allMysteryEncounters[0];
-      }
-
-      encounter = availableEncounters[Utils.randSeedInt(availableEncounters.length)];
+    if (encounter) {
+      encounter = new MysteryEncounter(encounter);
+      return encounter;
     }
+
+    // Common / Uncommon / Rare / Super Rare
+    const tierWeights = [34, 16, 11, 3];
+
+    // Adjust tier weights by previously encountered events to lower odds of only common/uncommons in run
+    this.mysteryEncounterFlags.encounteredEvents.forEach(val => {
+      const tier = val[1];
+      if (tier === MysteryEncounterTier.COMMON) {
+        tierWeights[0] = tierWeights[0] - 3;
+      } else if (tier === MysteryEncounterTier.UNCOMMON) {
+        tierWeights[1] = tierWeights[1] - 2;
+      }
+    });
+
+    const totalWeight = tierWeights.reduce((a, b) => a + b);
+    const tierValue = Utils.randSeedInt(totalWeight);
+    const commonThreshold = totalWeight - tierWeights[0];
+    const uncommonThreshold = totalWeight - tierWeights[0] - tierWeights[1];
+    const rareThreshold = totalWeight - tierWeights[0] - tierWeights[1] - tierWeights[2];
+    let tier = tierValue > commonThreshold ? MysteryEncounterTier.COMMON : tierValue > uncommonThreshold ? MysteryEncounterTier.UNCOMMON : tierValue > rareThreshold ? MysteryEncounterTier.RARE : MysteryEncounterTier.SUPER_RARE;
+
+    if (!Utils.isNullOrUndefined(Overrides.MYSTERY_ENCOUNTER_TIER_OVERRIDE)) {
+      tier = Overrides.MYSTERY_ENCOUNTER_TIER_OVERRIDE;
+    }
+
+    let availableEncounters = [];
+    // New encounter will never be the same as the most recent encounter
+    const previousEncounter = this.mysteryEncounterFlags.encounteredEvents?.length > 0 ? this.mysteryEncounterFlags.encounteredEvents[this.mysteryEncounterFlags.encounteredEvents.length - 1][0] : null;
+    // If no valid encounters exist at tier, checks next tier down, continuing until there are some encounters available
+    while (availableEncounters.length === 0 && tier >= 0) {
+      availableEncounters = allMysteryEncounters.filter((encounter) =>
+        encounter?.meetsRequirements(this) && encounter.encounterTier === tier && (isNullOrUndefined(previousEncounter) || encounter.encounterType !== previousEncounter));
+
+      tier--;
+    }
+
+    // If absolutely no encounters are available, spawn 0th encounter (mysterious trainers)
+    if (availableEncounters.length === 0) {
+      return allMysteryEncounters[0];
+    }
+
+    encounter = availableEncounters[Utils.randSeedInt(availableEncounters.length)];
 
     // New encounter object to not dirty flags
     encounter = new MysteryEncounter(encounter);
-
     return encounter;
   }
 }

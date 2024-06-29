@@ -4,12 +4,12 @@ export const mysteryEncounter: SimpleTranslationEntries = {
 
   // Mysterious Encounters -- Common Tier
 
-  "mysterious_chest_intro_message": "You found...@d{32}\na chest?",
+  "mysterious_chest_intro_message": "You found...@d{32} a chest?",
   "mysterious_chest_title": "The Mysterious Chest",
   "mysterious_chest_description": "A beautifully ornamented chest stands on the ground. There must be something good inside... right?",
   "mysterious_chest_query": "Will you open it?",
   "mysterious_chest_option_1_label": "Open it",
-  "mysterious_chest_option_1_tooltip": "(?) What could be inside?",
+  "mysterious_chest_option_1_tooltip": "(35%) Something terrible\n(40%) Okay Rewards\n(20%) Good Rewards\n(4%) Great Rewards\n(1%) Amazing Rewards",
   "mysterious_chest_option_2_label": "It's too risky, leave",
   "mysterious_chest_option_2_tooltip": "(-) No Rewards",
   "mysterious_chest_option_1_selected_message": "You open the chest to find...",
@@ -23,12 +23,12 @@ export const mysteryEncounter: SimpleTranslationEntries = {
 
   "fight_or_flight_intro_message": "Something shiny is sparkling\non the ground near that Pokémon!",
   "fight_or_flight_title": "Fight or Flight",
-  "fight_or_flight_description": "It looks like there's a strong Pokémon guarding an item. Fighting is the straightforward approach, but this Pokémon looks strong. You could also try to sneak around, but the Pokémon may catch you.",
+  "fight_or_flight_description": "It looks like there's a strong Pokémon guarding an item. Battling is the straightforward approach, but this Pokémon looks strong. You could also try to sneak around, though the Pokémon might catch you.",
   "fight_or_flight_query": "What will you do?",
-  "fight_or_flight_option_1_label": "Fight it",
-  "fight_or_flight_option_1_tooltip": "(+) Strong Pokémon Battle\n(+) New Item",
+  "fight_or_flight_option_1_label": "Battle it",
+  "fight_or_flight_option_1_tooltip": "(+) Hard Battle\n(+) New Item",
   "fight_or_flight_option_2_label": "Sneak around",
-  "fight_or_flight_option_2_tooltip": "(?%) New Item\n(?%) Hard Battle\n(?%) No Rewards",
+  "fight_or_flight_option_2_tooltip": "(35%) Steal Item\n(65%) Harder Battle",
   "fight_or_flight_option_3_label": "Leave",
   "fight_or_flight_option_3_tooltip": "(-) No Rewards",
   "fight_or_flight_option_1_selected_message": "You approach the\nPokémon without fear.",

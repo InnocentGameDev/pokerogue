@@ -13,6 +13,7 @@ import { BattlerIndex } from "../battle";
 import { Tutorial, handleTutorial } from "../tutorial";
 import { IvScannerModifier } from "../modifier/modifier";
 import * as Utils from "../utils";
+import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
 
 export class MysteryEncounterPhase extends Phase {
   constructor(scene: BattleScene) {
@@ -320,9 +321,11 @@ export class MysteryEncounterBattlePhase extends Phase {
  * - Queuing of the next wave
  */
 export class MysteryEncounterRewardsPhase extends Phase {
+  addHealPhase: boolean;
 
-  constructor(scene: BattleScene) {
+  constructor(scene: BattleScene, addHealPhase: boolean = false) {
     super(scene);
+    this.addHealPhase = addHealPhase;
   }
 
   start() {
@@ -331,6 +334,9 @@ export class MysteryEncounterRewardsPhase extends Phase {
     this.scene.executeWithSeedOffset(() => {
       if (this.scene.currentBattle.mysteryEncounter.doEncounterRewards) {
         this.scene.currentBattle.mysteryEncounter.doEncounterRewards(this.scene);
+      } else if (this.addHealPhase) {
+        this.scene.tryRemovePhase(p => p instanceof SelectModifierPhase);
+        this.scene.unshiftPhase(new SelectModifierPhase(this.scene, 0, null, { fillRemaining: false, rerollMultiplier: 0}));
       }
     }, this.scene.currentBattle.waveIndex);
 

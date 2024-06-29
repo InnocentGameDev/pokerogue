@@ -208,7 +208,8 @@ export function getRandomSpeciesByStarterTier(starterTiers: number | [number, nu
     });
   }
 
-  // If no filtered mons exist at specified starter tier, will expand starter search range until there are
+  // If no filtered mons exist at specified starter tiers, will expand starter search range until there are
+  // Starts by decrementing starter tier min until it is 0, then increments tier max up to 10
   let tryFilterStarterTiers = filteredSpecies.filter(s => s[1] >= min && s[1] <= max);
   while (tryFilterStarterTiers.length === 0 || !(min === 0 && max === 10)) {
     if (min > 0) {
@@ -294,13 +295,13 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
   battle.enemyParty = [];
   battle.double = doubleBattle;
 
-  // Adjust levels for battle by modifier
-  // ME levels are modified by an additive that scales with wave index
-  // Every 10 floors, 1 will be added to level value, which starts at 2
+  // ME levels are modified by an additive value that scales with wave index
+  // Base scaling: Every 10 waves, modifier gets +1 level
   // This can be amplified or counteracted by setting levelAdditiveMultiplier in config
-  // Leaving undefined will default to 0
+  // levelAdditiveMultiplier value of 0.5 will halve the modifier scaling, 2 will double it, etc.
+  // Leaving null/undefined will disable level scaling
   const mult = !isNullOrUndefined(partyConfig.levelAdditiveMultiplier) ? partyConfig.levelAdditiveMultiplier : 0;
-  const additive = Math.max(Math.round((2 + scene.currentBattle.waveIndex / 10) * mult), 0);
+  const additive = Math.max(Math.round((scene.currentBattle.waveIndex / 10) * mult), 0);
   battle.enemyLevels = battle.enemyLevels.map(level => level + additive);
 
   battle.enemyLevels.forEach((level, e) => {
@@ -502,18 +503,19 @@ export function setEncounterExp(scene: BattleScene, expMultiplier: number = 100)
  * Can be used to exit an encounter without any battles or followup
  * Will skip any shops and rewards, and queue the next encounter phase as normal
  * @param scene
+ * @param addHealPhase - when true, will add a shop phase to end of encounter with 0 rewards but healing items are available
  */
-export function leaveEncounterWithoutBattle(scene: BattleScene) {
+export function leaveEncounterWithoutBattle(scene: BattleScene, addHealPhase: boolean = false) {
   scene.currentBattle.mysteryEncounter.encounterVariant = MysteryEncounterVariant.NO_BATTLE;
   scene.clearPhaseQueue();
   scene.clearPhaseQueueSplice();
-  handleMysteryEncounterVictory(scene);
+  handleMysteryEncounterVictory(scene, addHealPhase);
 }
 
-export function handleMysteryEncounterVictory(scene: BattleScene) {
+export function handleMysteryEncounterVictory(scene: BattleScene, addHealPhase: boolean = false) {
   if (scene.currentBattle.mysteryEncounter.encounterVariant === MysteryEncounterVariant.NO_BATTLE) {
     scene.pushPhase(new EggLapsePhase(scene));
-    scene.pushPhase(new MysteryEncounterRewardsPhase(scene));
+    scene.pushPhase(new MysteryEncounterRewardsPhase(scene, addHealPhase));
   } else if (!scene.getEnemyParty().find(p => scene.currentBattle.mysteryEncounter.encounterVariant !== MysteryEncounterVariant.TRAINER_BATTLE ? p.isOnField() : !p?.isFainted(true))) {
     scene.pushPhase(new BattleEndPhase(scene));
     if (scene.currentBattle.mysteryEncounter.encounterVariant === MysteryEncounterVariant.TRAINER_BATTLE) {
@@ -521,7 +523,7 @@ export function handleMysteryEncounterVictory(scene: BattleScene) {
     }
     if (scene.gameMode.isEndless || !scene.gameMode.isWaveFinal(scene.currentBattle.waveIndex)) {
       scene.pushPhase(new EggLapsePhase(scene));
-      scene.pushPhase(new MysteryEncounterRewardsPhase(scene));
+      scene.pushPhase(new MysteryEncounterRewardsPhase(scene, addHealPhase));
     }
   }
 }

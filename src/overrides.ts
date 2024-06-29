@@ -19,6 +19,7 @@ import { Moves } from "#enums/moves";
 import { Species } from "#enums/species";
 import { TimeOfDay } from "#enums/time-of-day";
 import {MysteryEncounterType} from "#enums/mystery-encounter-type"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import {MysteryEncounterTier} from "#app/data/mystery-encounter"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 /**
  * Overrides for testing different in game situations
@@ -118,8 +119,8 @@ export const EGG_GACHA_PULL_COUNT_OVERRIDE: number = 0;
 
 // 1 to 256, set to null to ignore
 export const MYSTERY_ENCOUNTER_RATE_OVERRIDE: number = null;
-// Can use MysteryEncounterType, set to null to ignore (e.g. MysteryEncounterType.DARK_DEAL)
-export const MYSTERY_ENCOUNTER_OVERRIDE: number = null;
+export const MYSTERY_ENCOUNTER_TIER_OVERRIDE: MysteryEncounterTier = null;
+export const MYSTERY_ENCOUNTER_OVERRIDE: MysteryEncounterType = null;
 
 /**
  * MODIFIER / ITEM OVERRIDES

@@ -1,7 +1,7 @@
 # 📝 Most immediate things to-do list
 
 - ### High priority
-    - 🐛 [Should be fixed] MEs calculate what's happening before Biome loads, which means potential bugs on floor changes (11, 21...)
+    - 🐛 Intimidate and other ETB abilities proc twice at the start of wild MEs (fight or flight, dark deal) 
     - ⚙️ Add a tag system so MEs don't show where they shouldn't and bricking Challenge runs:
       - noChallenge (cant be spawned in challenge runs)
       - allChallenge (can spawn in all challenge modes)
@@ -9,14 +9,10 @@
         - Example: fireOnly (can only spawn in fire related challenges)
 
 - ### Medium priority
-    - ⚙️ [Complete] Add some spacing logic to MEs spawning so you don't get floods/droughts of MEs ✔️
 
 - ### Low priority
     - 🐛 Mysterious Challengers can spawn two trainers (or three) of the same type [Dev comment: not a bug]
     - 🐛 Fight or Flight intro visuals may show different gender from the actual spawned pokemon
-    - 🐛 [Should be fixed] Tooltip bug in Events. When showing the tooltip of the 2nd or later Event you've found, the tooltip for the first option will match whatever option you selected in the previous Event. This wrong tooltip gets overriden once you move the cursor.
-      - Example: if you chose the hardest battle in Mysterious Challenger, and then roll into a 'Fight or Flight' Event, the option 'Fight' will show 'Brutal Battle, Great Reward'.
-
 
 # 📝 Things to be done before Mystery Encounters ("MEs/Events") MVP is finished:
   All the things on this list should be done before an MVP (Minimum Viable Product) can be playtested.

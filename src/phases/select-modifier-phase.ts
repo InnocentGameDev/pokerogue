@@ -21,6 +21,7 @@ import {Mode} from "#app/ui/ui";
 import PartyUiHandler, {PartyOption, PartyUiMode} from "#app/ui/party-ui-handler";
 import ModifierSelectUiHandler, {SHOP_OPTIONS_ROW_LIMIT} from "#app/ui/modifier-select-ui-handler";
 import {BattlePhase} from "#app/phases/battle-phase";
+import {isNullOrUndefined} from "#app/utils";
 
 export class SelectModifierPhase extends BattlePhase {
   private rerollCount: integer;
@@ -53,12 +54,14 @@ export class SelectModifierPhase extends BattlePhase {
 
     // If custom modifiers are specified, overrides default item count
     if (!!this.customModifierSettings) {
-      const newCount = (this.customModifierSettings.guaranteedModifierTiers?.length || 0) + (this.customModifierSettings.guaranteedModifierTypeFuncs?.length || 0);
+      const newItemCount = (this.customModifierSettings.guaranteedModifierTiers?.length || 0) +
+        (this.customModifierSettings.guaranteedModifierTypeFuncs?.length || 0) +
+        (this.customModifierSettings.guaranteedModifierTypeFuncs?.length || 0);
       if (this.customModifierSettings.fillRemaining) {
         const originalCount = modifierCount.value;
-        modifierCount = new Utils.IntegerHolder(originalCount > newCount ? originalCount : newCount);
+        modifierCount = new Utils.IntegerHolder(originalCount > newItemCount ? originalCount : newItemCount);
       } else {
-        modifierCount = new Utils.IntegerHolder(newCount);
+        modifierCount = new Utils.IntegerHolder(newItemCount);
       }
     }
 
@@ -82,7 +85,7 @@ export class SelectModifierPhase extends BattlePhase {
         switch (cursor) {
         case 0:
           const rerollCost = this.getRerollCost(typeOptions, this.scene.lockModifierTiers);
-          if (this.scene.money < rerollCost) {
+          if (rerollCost === 0 || this.scene.money < rerollCost) {
             this.scene.ui.playError();
             return false;
           } else {
@@ -123,6 +126,11 @@ export class SelectModifierPhase extends BattlePhase {
         }
         return true;
       case 1:
+        if (typeOptions.length === 0) {
+          this.scene.ui.revertMode();
+          this.scene.ui.setMode(Mode.MESSAGE);
+          super.end();
+        }
         modifierType = typeOptions[cursor].type;
         break;
       default:
@@ -233,7 +241,8 @@ export class SelectModifierPhase extends BattlePhase {
     } else {
       baseValue = 250;
     }
-    return Math.min(Math.ceil(this.scene.currentBattle.waveIndex / 10) * baseValue * Math.pow(2, this.rerollCount), Number.MAX_SAFE_INTEGER);
+    const multiplier = !isNullOrUndefined(this.customModifierSettings?.rerollMultiplier)  ? this.customModifierSettings.rerollMultiplier : 1;
+    return Math.min(Math.ceil(this.scene.currentBattle.waveIndex / 10) * baseValue * Math.pow(2, this.rerollCount) * multiplier, Number.MAX_SAFE_INTEGER);
   }
 
   getPoolType(): ModifierPoolType {

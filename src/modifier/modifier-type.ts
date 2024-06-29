@@ -1798,6 +1798,7 @@ export interface CustomModifierSettings {
   guaranteedModifierTypeOptions?: ModifierTypeOption[];
   guaranteedModifierTypeFuncs?: ModifierTypeFunc[];
   fillRemaining?: boolean;
+  rerollMultiplier?: number;
 }
 
 export function getModifierTypeFuncById(id: string): ModifierTypeFunc {

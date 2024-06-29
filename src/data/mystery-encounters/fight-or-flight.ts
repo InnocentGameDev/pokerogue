@@ -83,14 +83,14 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
       setCustomEncounterRewards(scene, { guaranteedModifierTypeOptions: [item], fillRemaining: false});
 
       const roll = Utils.randSeedInt(16);
-      if (roll > 4) {
-        // Noticed and attacked by boss, gets +1 to all stats at start of fight (75%)
+      if (roll > 6) {
+        // Noticed and attacked by boss, gets +1 to all stats at start of fight (62.5%)
         const config = scene.currentBattle.mysteryEncounter.enemyPartyConfigs[0];
         config.pokemonConfigs[0].tags = [BattlerTagType.ENRAGED];
         await showEncounterText(scene, "mysteryEncounter:fight_or_flight_option_2_bad_result");
         await initBattleWithEnemyConfig(scene, config);
       } else {
-        // Steal item (25%)
+        // Steal item (37.5%)
         // Display result message then proceed to rewards
         await showEncounterText(scene, "mysteryEncounter:fight_or_flight_option_2_good_result")
           .then(() => leaveEncounterWithoutBattle(scene));
@@ -100,7 +100,7 @@ export const FightOrFlightEncounter: MysteryEncounter = new MysteryEncounterBuil
   .withOption(new MysteryEncounterOptionBuilder()
     .withOptionPhase(async (scene: BattleScene) => {
       // Leave encounter with no rewards or exp
-      leaveEncounterWithoutBattle(scene);
+      leaveEncounterWithoutBattle(scene, true);
       return true;
     })
     .build())

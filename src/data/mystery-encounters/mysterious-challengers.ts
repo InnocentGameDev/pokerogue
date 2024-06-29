@@ -70,7 +70,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
     const brutalSpriteKey = brutalConfig.getSpriteKey(female, brutalConfig.doubleOnly);
     instance.enemyPartyConfigs.push({
       trainerConfig: brutalConfig,
-      levelAdditiveMultiplier: 0.85,
+      levelAdditiveMultiplier: 1.1,
       female: female
     });
 
