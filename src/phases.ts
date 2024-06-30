@@ -1089,7 +1089,7 @@ export class EncounterPhase extends BattlePhase {
       }
     });
 
-    if (this.scene.currentBattle.battleType !== BattleType.TRAINER) {
+    if (this.scene.currentBattle.battleType !== BattleType.TRAINER && this.scene.currentBattle.battleType !== BattleType.MYSTERY_ENCOUNTER) {
       enemyField.map(p => this.scene.pushConditionalPhase(new PostSummonPhase(this.scene, p.getBattlerIndex()), () => {
         // if there is not a player party, we can't continue
         if (!this.scene.getParty()?.length) {

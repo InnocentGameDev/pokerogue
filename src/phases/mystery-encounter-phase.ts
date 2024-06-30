@@ -28,7 +28,7 @@ export class MysteryEncounterPhase extends Phase {
     this.scene.clearPhaseQueueSplice();
 
     // Sets flag that ME was encountered
-    // Can be used in later MEs to check for requirements to spawn
+    // Can be used in later MEs to check for requirements to spawn, etc.
     this.scene.mysteryEncounterFlags.encounteredEvents.push([this.scene.currentBattle.mysteryEncounter.encounterType, this.scene.currentBattle.mysteryEncounter.encounterTier]);
 
     // Initiates encounter dialogue window and option select
@@ -260,10 +260,24 @@ export class MysteryEncounterBattlePhase extends Phase {
     });
 
     if (encounterVariant !== MysteryEncounterVariant.TRAINER_BATTLE) {
-      enemyField.map(p => scene.pushPhase(new PostSummonPhase(scene, p.getBattlerIndex())));
-      const ivScannerModifier = scene.findModifier(m => m instanceof IvScannerModifier);
+      enemyField.map(p => this.scene.pushConditionalPhase(new PostSummonPhase(this.scene, p.getBattlerIndex()), () => {
+        // if there is not a player party, we can't continue
+        if (!this.scene.getParty()?.length) {
+          return false;
+        }
+        // how many player pokemon are on the field ?
+        const pokemonsOnFieldCount = this.scene.getParty().filter(p => p.isOnField()).length;
+        // if it's a 2vs1, there will never be a 2nd pokemon on our field even
+        const requiredPokemonsOnField = Math.min(this.scene.getParty().filter((p) => !p.isFainted()).length, 2);
+        // if it's a double, there should be 2, otherwise 1
+        if (this.scene.currentBattle.double) {
+          return pokemonsOnFieldCount === requiredPokemonsOnField;
+        }
+        return pokemonsOnFieldCount === 1;
+      }));
+      const ivScannerModifier = this.scene.findModifier(m => m instanceof IvScannerModifier);
       if (ivScannerModifier) {
-        enemyField.map(p => scene.pushPhase(new ScanIvsPhase(scene, p.getBattlerIndex(), Math.min(ivScannerModifier.getStackCount() * 2, 6))));
+        enemyField.map(p => this.scene.pushPhase(new ScanIvsPhase(this.scene, p.getBattlerIndex(), Math.min(ivScannerModifier.getStackCount() * 2, 6))));
       }
     }
 
@@ -297,7 +311,7 @@ export class MysteryEncounterBattlePhase extends Phase {
       }
     }
 
-    // TODO:
+    // TODO: remove?
     handleTutorial(this.scene, Tutorial.Access_Menu).then(() => super.end());
   }
 

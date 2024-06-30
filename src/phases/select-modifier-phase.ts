@@ -47,7 +47,7 @@ export class SelectModifierPhase extends BattlePhase {
 
     const party = this.scene.getParty();
     regenerateModifierPoolThresholds(party, this.getPoolType(), this.rerollCount);
-    let  modifierCount = new Utils.IntegerHolder(3);
+    const  modifierCount = new Utils.IntegerHolder(3);
     if (this.isPlayer()) {
       this.scene.applyModifiers(ExtraModifierModifier, true, modifierCount);
     }
@@ -59,9 +59,9 @@ export class SelectModifierPhase extends BattlePhase {
         (this.customModifierSettings.guaranteedModifierTypeFuncs?.length || 0);
       if (this.customModifierSettings.fillRemaining) {
         const originalCount = modifierCount.value;
-        modifierCount = new Utils.IntegerHolder(originalCount > newItemCount ? originalCount : newItemCount);
+        modifierCount.value = originalCount > newItemCount ? originalCount : newItemCount;
       } else {
-        modifierCount = new Utils.IntegerHolder(newItemCount);
+        modifierCount.value = newItemCount;
       }
     }
 
