@@ -19,7 +19,7 @@ export const MysteriousChestEncounter: MysteryEncounter = new MysteryEncounterBu
       hasShadow: true
     }
   ])
-  .withRequirement(new WaveCountRequirement([2, 180])) // waves 2 to 180
+  .withRequirement(new WaveCountRequirement([10, 180])) // waves 2 to 180
   .withOption(new MysteryEncounterOptionBuilder()
     .withOptionPhase(async (scene: BattleScene) => {
       // Open the chest

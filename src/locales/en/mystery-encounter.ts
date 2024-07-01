@@ -54,7 +54,24 @@ export const mysteryEncounter: SimpleTranslationEntries = {
   "mysterious_challengers_outro_win": "The mysterious challenger was defeated!",
 
   // Mysterious Encounters -- Rare Tier
-  // Gholdengo Gang
+  "training_session_intro_message": "You've come across a some\ntraining tools and supplies.",
+  "training_session_title": "Training Session",
+  "training_session_description": "These supplies look like they could be used to train a member of your party! There are a few ways you could train your Pokémon, by battling against it with the rest of your team.",
+  "training_session_query": "How should you train?",
+  "training_session_option_1_label": "Light Training",
+  "training_session_option_1_tooltip": "(-) Light Battle\n(+) Improve 2 Random IVs of Pokémon",
+  "training_session_option_2_label": "Moderate Training",
+  "training_session_option_2_tooltip": "(-) Moderate Battle\n(+) Change Pokémon's Nature",
+  "training_session_option_2_select_prompt": "Select a new nature\nto train your Pokémon in.",
+  "training_session_option_3_label": "Heavy Training",
+  "training_session_option_3_tooltip": "(-) Harsh Battle\n(+) Change Pokémon's Ability",
+  "training_session_option_3_select_prompt": "Select a new ability\nto train your Pokémon in.",
+  "training_session_option_selected_message": "@ec{pokeName} moves across\nthe clearing to face you...",
+  "training_session_battle_finished": "@ec{pokeName} returns, feeling\nworn out but accomplished!",
+  "training_session_outro_win": "@ec{pokeName} is feeling improved\nafter the training session!",
+  "training_session_outro_1": "It's @ec{stat1} and @ec{stat2}\nIVs were improved!",
+  "training_session_outro_2": "It's nature was changed to @ec{nature}!",
+  "training_session_outro_3": "It's ability was changed to @ec{ability}!",
 
   // Mysterious Encounters -- Super Rare Tier
 

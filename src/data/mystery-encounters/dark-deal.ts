@@ -136,7 +136,7 @@ export const DarkDealEncounter: MysteryEncounter = new MysteryEncounterBuilder()
   .withRequirement(new PartySizeRequirement([2, 6])) // Must have at least 2 pokemon in party
   .withCatchAllowed(true)
   .withOption(new MysteryEncounterOptionBuilder()
-    .withPreOptionPhase((scene: BattleScene) => {
+    .withPreOptionPhase(async (scene: BattleScene) => {
       // Removes random pokemon (including fainted) from party and adds name to dialogue data tokens
       // Will never return last battle able mon and instead pick fainted/unable to battle
       const removedPokemon = getRandomPlayerPokemon(scene, false, true);

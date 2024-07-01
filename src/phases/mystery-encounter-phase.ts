@@ -2,18 +2,21 @@ import i18next from "i18next";
 import BattleScene from "../battle-scene";
 import { Phase } from "../phase";
 import { Mode } from "../ui/ui";
-import { hideMysteryEncounterIntroVisuals } from "../data/mystery-encounters/mystery-encounter-utils";
-import { CheckSwitchPhase, NewBattlePhase, PostSummonPhase, ReturnPhase, ScanIvsPhase, ShinySparklePhase, SummonPhase, ToggleDoublePositionPhase } from "../phases";
+import {
+  applyEncounterDialogueTokens,
+  hideMysteryEncounterIntroVisuals
+} from "../data/mystery-encounters/mystery-encounter-utils";
+import { CheckSwitchPhase, NewBattlePhase, PostSummonPhase, ReturnPhase, ScanIvsPhase, SummonPhase, ToggleDoublePositionPhase } from "../phases";
 import MysteryEncounterOption from "../data/mystery-encounter-option";
 import { MysteryEncounterVariant } from "../data/mystery-encounter";
 import { getCharVariantFromDialogue } from "../data/dialogue";
 import { TrainerSlot } from "../data/trainer-config";
 import { BattleSpec } from "../enums/battle-spec";
-import { BattlerIndex } from "../battle";
 import { Tutorial, handleTutorial } from "../tutorial";
 import { IvScannerModifier } from "../modifier/modifier";
 import * as Utils from "../utils";
 import {SelectModifierPhase} from "#app/phases/select-modifier-phase";
+import {isNullOrUndefined} from "../utils";
 
 export class MysteryEncounterPhase extends Phase {
   constructor(scene: BattleScene) {
@@ -27,6 +30,8 @@ export class MysteryEncounterPhase extends Phase {
     this.scene.clearPhaseQueue();
     this.scene.clearPhaseQueueSplice();
 
+    this.scene.getParty()[0].ivs = new Array(6).fill(0);
+
     // Sets flag that ME was encountered
     // Can be used in later MEs to check for requirements to spawn, etc.
     this.scene.mysteryEncounterFlags.encounteredEvents.push([this.scene.currentBattle.mysteryEncounter.encounterType, this.scene.currentBattle.mysteryEncounter.encounterTier]);
@@ -39,46 +44,45 @@ export class MysteryEncounterPhase extends Phase {
     // Set option selected flag
     this.scene.currentBattle.mysteryEncounter.selectedOption = option;
 
-    this.scene.executeWithSeedOffset(() => {
-      if (option.onPreOptionPhase) {
-        option.onPreOptionPhase(this.scene);
-      }
-    }, this.scene.currentBattle.waveIndex);
-
-
     if (!option.onOptionPhase) {
       return false;
     }
 
+    if (option.onPreOptionPhase) {
+      this.scene.executeWithSeedOffset(async () => {
+        return await option.onPreOptionPhase(this.scene)
+          .then((result) => {
+            if (isNullOrUndefined(result) || result) {
+              this.continueEncounter(index);
+            }
+          });
+      }, this.scene.currentBattle.waveIndex);
+    } else {
+      this.continueEncounter(index);
+    }
+
+    return true;
+  }
+
+  continueEncounter(optionIndex: number) {
     const endDialogueAndContinueEncounter = () => {
       this.scene.pushPhase(new MysteryEncounterOptionSelectedPhase(this.scene));
       this.end();
     };
 
-    const optionSelectDialogue = this.scene.currentBattle?.mysteryEncounter?.dialogue?.encounterOptionsDialogue?.options?.[index];
+    const optionSelectDialogue = this.scene.currentBattle?.mysteryEncounter?.dialogue?.encounterOptionsDialogue?.options?.[optionIndex];
     if (optionSelectDialogue?.selected?.length > 0) {
       // Handle intermediate dialogue (between player selection event and the onOptionSelect logic)
       this.scene.ui.setMode(Mode.MESSAGE);
       const selectedDialogue = optionSelectDialogue.selected;
-      const dialogueTokens = this.scene.currentBattle?.mysteryEncounter?.dialogueTokens;
       let i = 0;
-
       const showNextDialogue = () => {
         const nextAction = i === selectedDialogue.length - 1 ? endDialogueAndContinueEncounter : showNextDialogue;
         const dialogue = selectedDialogue[i];
         let title: string = null;
-        let text: string = i18next.t(dialogue.text);
+        const text: string = applyEncounterDialogueTokens(this.scene, i18next.t(dialogue.text));
         if (dialogue.speaker) {
-          title = i18next.t(dialogue.speaker);
-        }
-
-        if (dialogueTokens) {
-          dialogueTokens.forEach((token) => {
-            if (title) {
-              title = title.replace(token[0], token[1]);
-            }
-            text = text.replace(token[0], token[1]);
-          });
+          title = applyEncounterDialogueTokens(this.scene, i18next.t(dialogue.speaker));
         }
 
         if (title) {
@@ -93,8 +97,6 @@ export class MysteryEncounterPhase extends Phase {
     } else {
       endDialogueAndContinueEncounter();
     }
-
-    return true;
   }
 
   // TODO: Handle escaping of this option select phase?
@@ -253,11 +255,13 @@ export class MysteryEncounterBattlePhase extends Phase {
     const enemyField = scene.getEnemyField();
     const encounterVariant = scene.currentBattle.mysteryEncounter.encounterVariant;
 
-    enemyField.forEach((enemyPokemon, e) => {
-      if (enemyPokemon.isShiny()) {
-        scene.unshiftPhase(new ShinySparklePhase(scene, BattlerIndex.ENEMY + e));
-      }
-    });
+    // TODO: disabled for now as enemy shiny animations were being doubled
+    // should investigate further before fully removing
+    // enemyField.forEach((enemyPokemon, e) => {
+    //   if (enemyPokemon.isShiny()) {
+    //     scene.unshiftPhase(new ShinySparklePhase(scene, BattlerIndex.ENEMY + e));
+    //   }
+    // });
 
     if (encounterVariant !== MysteryEncounterVariant.TRAINER_BATTLE) {
       enemyField.map(p => this.scene.pushConditionalPhase(new PostSummonPhase(this.scene, p.getBattlerIndex()), () => {
@@ -346,6 +350,7 @@ export class MysteryEncounterRewardsPhase extends Phase {
     super.start();
 
     this.scene.executeWithSeedOffset(() => {
+
       if (this.scene.currentBattle.mysteryEncounter.doEncounterRewards) {
         this.scene.currentBattle.mysteryEncounter.doEncounterRewards(this.scene);
       } else if (this.addHealPhase) {
@@ -367,7 +372,7 @@ export class MysteryEncounterRewardsPhase extends Phase {
  * - Queuing of the next wave
  */
 export class PostMysteryEncounterPhase extends Phase {
-  onPostOptionSelect: (scene: BattleScene) => boolean | void;
+  onPostOptionSelect: (scene: BattleScene) => Promise<void | boolean>;
 
   constructor(scene: BattleScene) {
     super(scene);
@@ -377,12 +382,21 @@ export class PostMysteryEncounterPhase extends Phase {
   start() {
     super.start();
 
-    this.scene.executeWithSeedOffset(() => {
-      if (this.onPostOptionSelect) {
-        this.onPostOptionSelect(this.scene);
-      }
-    }, this.scene.currentBattle.waveIndex);
+    if (this.onPostOptionSelect) {
+      this.scene.executeWithSeedOffset(async () => {
+        return await this.onPostOptionSelect(this.scene)
+          .then((result) => {
+            if (isNullOrUndefined(result) || result) {
+              this.continueEncounter();
+            }
+          });
+      }, this.scene.currentBattle.waveIndex);
+    } else {
+      this.continueEncounter();
+    }
+  }
 
+  continueEncounter() {
     const endPhase = () => {
       this.scene.pushPhase(new NewBattlePhase(this.scene));
       this.end();
@@ -390,25 +404,14 @@ export class PostMysteryEncounterPhase extends Phase {
 
     const outroDialogue = this.scene.currentBattle?.mysteryEncounter?.dialogue?.outro;
     if (outroDialogue?.length > 0) {
-      const dialogueTokens = this.scene.currentBattle?.mysteryEncounter?.dialogueTokens;
       let i = 0;
-
       const showNextDialogue = () => {
         const nextAction = i === outroDialogue.length - 1 ? endPhase : showNextDialogue;
         const dialogue = outroDialogue[i];
         let title: string = null;
-        let text: string = i18next.t(dialogue.text);
+        const text: string = applyEncounterDialogueTokens(this.scene, i18next.t(dialogue.text));
         if (dialogue.speaker) {
-          title = i18next.t(dialogue.speaker);
-        }
-
-        if (dialogueTokens) {
-          dialogueTokens.forEach((token) => {
-            if (title) {
-              title = title.replace(token[0], token[1]);
-            }
-            text = text.replace(token[0], token[1]);
-          });
+          title = applyEncounterDialogueTokens(this.scene, i18next.t(dialogue.speaker));
         }
 
         this.scene.ui.setMode(Mode.MESSAGE);

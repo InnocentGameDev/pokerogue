@@ -11,7 +11,7 @@ import {PokemonExpBoosterModifier} from "../../modifier/modifier";
 import {
   CustomModifierSettings,
   ModifierPoolType,
-  ModifierTypeFunc,
+  ModifierTypeFunc, PokemonHeldItemModifierType,
   regenerateModifierPoolThresholds
 } from "../../modifier/modifier-type";
 import {BattleEndPhase, EggLapsePhase, ModifierRewardPhase, TrainerVictoryPhase} from "../../phases";
@@ -23,6 +23,7 @@ import {TrainerType} from "#enums/trainer-type";
 import {Species} from "#enums/species";
 import {Type} from "#app/data/type";
 import {BattlerTagType} from "#enums/battler-tag-type";
+import PokemonData from "#app/system/pokemon-data";
 
 /**
  * Util file for functions used in mystery encounters
@@ -232,7 +233,12 @@ export function getRandomSpeciesByStarterTier(starterTiers: number | [number, nu
 export class EnemyPokemonConfig {
   species: PokemonSpecies;
   isBoss: boolean = false;
+  bossSegments?: number;
+  bossSegmentModifier?: number; // Additive to the determined segment number
   formIndex?: number;
+  level?: number;
+  modifierTypes?: PokemonHeldItemModifierType[];
+  dataSource?: PokemonData;
   tags?: BattlerTagType[];
 }
 
@@ -303,9 +309,9 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
   const mult = !isNullOrUndefined(partyConfig.levelAdditiveMultiplier) ? partyConfig.levelAdditiveMultiplier : 0;
   const additive = Math.max(Math.round((scene.currentBattle.waveIndex / 10) * mult), 0);
   battle.enemyLevels = battle.enemyLevels.map(level => level + additive);
-
   battle.enemyLevels.forEach((level, e) => {
     let enemySpecies;
+    let dataSource;
     if (!loaded) {
       if (trainerType || trainerConfig) {
         battle.enemyParty[e] = battle.trainer.genPartyMember(e);
@@ -313,6 +319,8 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
         let isBoss = false;
         if (e < partyConfig?.pokemonConfigs?.length) {
           const config = partyConfig?.pokemonConfigs?.[e];
+          level = config.level ? config.level : level;
+          dataSource = config.dataSource;
           enemySpecies = config.species;
           isBoss = config.isBoss;
           if (isBoss) {
@@ -322,11 +330,13 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
           enemySpecies = scene.randomSpecies(battle.waveIndex, level, true);
         }
 
-        battle.enemyParty[e] = scene.addEnemyPokemon(enemySpecies, level, TrainerSlot.NONE, isBoss);
+        battle.enemyParty[e] = scene.addEnemyPokemon(enemySpecies, level, TrainerSlot.NONE, isBoss, dataSource);
       }
     }
 
     const enemyPokemon = scene.getEnemyParty()[e];
+    // Generate new id in case using data source
+    enemyPokemon.id = Utils.randSeedInt(4294967296);
 
     if (e < (doubleBattle ? 2 : 1)) {
       enemyPokemon.setX(-66 + enemyPokemon.getFieldPositionOffset()[0]);
@@ -347,7 +357,11 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
 
       // Set Boss
       if (config.isBoss) {
-        enemyPokemon.setBoss(true, scene.getEncounterBossSegments(scene.currentBattle.waveIndex, level, enemySpecies, true));
+        let segments = !isNullOrUndefined(config.bossSegments) ? config.bossSegments : scene.getEncounterBossSegments(scene.currentBattle.waveIndex, level, enemySpecies, true);
+        if (!isNullOrUndefined(config.bossSegmentModifier)) {
+          segments += config.bossSegmentModifier;
+        }
+        enemyPokemon.setBoss(true, segments);
       }
 
       // Set tags
@@ -358,6 +372,8 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
         // Requires re-priming summon data so that tags are not cleared on SummonPhase
         enemyPokemon.primeSummonData(enemyPokemon.summonData);
       }
+
+      enemyPokemon.initBattleInfo();
     }
 
     loadEnemyAssets.push(enemyPokemon.loadAssets());
@@ -380,7 +396,8 @@ export async function initBattleWithEnemyConfig(scene: BattleScene, partyConfig:
   });
   if (!loaded) {
     regenerateModifierPoolThresholds(scene.getEnemyField(), battle.battleType === BattleType.TRAINER ? ModifierPoolType.TRAINER : ModifierPoolType.WILD);
-    scene.generateEnemyModifiers();
+    const customModifiers = partyConfig?.pokemonConfigs?.map(config => config?.modifierTypes);
+    scene.generateEnemyModifiers(customModifiers);
   }
 }
 
@@ -430,9 +447,14 @@ export function showTrainerDialogue(scene: BattleScene): Promise<boolean> {
  * @param scene - Battle Scene
  * @param customShopRewards - adds a shop phase with the specified rewards / reward tiers
  * @param nonShopRewards - will add a non-shop reward phase for each specified item/modifier (can happen in addition to a shop)
+ * @param preRewardsCallback - can execute an arbitrary callback before the new phases if necessary
  */
-export function setCustomEncounterRewards(scene: BattleScene, customShopRewards?: CustomModifierSettings, nonShopRewards?: ModifierTypeFunc[]) {
+export function setCustomEncounterRewards(scene: BattleScene, customShopRewards?: CustomModifierSettings, nonShopRewards?: ModifierTypeFunc[], preRewardsCallback?: Function) {
   scene.currentBattle.mysteryEncounter.doEncounterRewards = (scene: BattleScene) => {
+    if (preRewardsCallback) {
+      preRewardsCallback();
+    }
+
     if (customShopRewards) {
       scene.unshiftPhase(new SelectModifierPhase(scene, 0, null, customShopRewards));
     } else {
@@ -526,4 +548,16 @@ export function handleMysteryEncounterVictory(scene: BattleScene, addHealPhase: 
       scene.pushPhase(new MysteryEncounterRewardsPhase(scene, addHealPhase));
     }
   }
+}
+
+export function applyEncounterDialogueTokens(scene: BattleScene, text: string): string {
+  const dialogueTokens = scene.currentBattle?.mysteryEncounter?.dialogueTokens;
+
+  if (dialogueTokens) {
+    dialogueTokens.forEach((token) => {
+      text = text.replace(token[0], token[1]);
+    });
+  }
+
+  return text;
 }

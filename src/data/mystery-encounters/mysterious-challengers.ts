@@ -19,7 +19,7 @@ export const MysteriousChallengersEncounter: MysteryEncounter = new MysteryEncou
   .withEncounterType(MysteryEncounterType.MYSTERIOUS_CHALLENGERS)
   .withEncounterTier(MysteryEncounterTier.UNCOMMON)
   .withIntroSpriteConfigs([]) // These are set in onInit()
-  .withRequirement(new WaveCountRequirement([2, 180])) // waves 2 to 180
+  .withRequirement(new WaveCountRequirement([10, 180])) // waves 10 to 180
   .withOnInit((scene: BattleScene) => {
     const instance = scene.currentBattle.mysteryEncounter;
     // Calculates what trainers are available for battle in the encounter

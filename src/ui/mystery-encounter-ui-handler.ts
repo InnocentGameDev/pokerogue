@@ -100,6 +100,7 @@ export default class MysteryEncounterUiHandler extends UiHandler {
       if (button === Button.ACTION) {
         if (cursor === this.viewPartyIndex) {
           // Handle view party
+          success = true;
           this.clear();
           this.scene.ui.setMode(Mode.PARTY, PartyUiMode.CHECK, -1, () => {
             this.scene.ui.setMode(Mode.MYSTERY_ENCOUNTER, true);
