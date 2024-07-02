@@ -144,10 +144,13 @@ export default class MysteryEncounter implements MysteryEncounter {
    * @returns
    */
   meetsRequirements?(scene: BattleScene) {
-    return !this.requirements.some(requirement => !requirement.meetsRequirement(scene));
+    const sceneReq =  !this.requirements.some(requirement => !requirement.meetsRequirement(scene));
+    const suppReqs = this.meetsSupportingRequirementAndSupportingPokemonSelected(scene); // support is checked first to handle cases of protagonist overlapping with support
+    const proReqs = this.meetsProtagonistRequirementAndProtagonistPokemonSelected(scene);
+    return sceneReq && suppReqs && proReqs;
   }
 
-  meetsProtagonistRequirementAndProtagonistPokemonSelected?(scene: BattleScene) {
+  private meetsProtagonistRequirementAndProtagonistPokemonSelected?(scene: BattleScene) {
     if (!this.protagonistPokemonRequirements) {
       const activeMon = scene.getParty().filter(p => p.isActive());
       if (activeMon.length > 0) {
@@ -205,7 +208,7 @@ export default class MysteryEncounter implements MysteryEncounter {
     }
   }
 
-  meetsSupportingRequirementAndSupportingPokemonSelected?(scene: BattleScene) {
+  private meetsSupportingRequirementAndSupportingPokemonSelected?(scene: BattleScene) {
     if (!this.supportPokemonRequirements) {
       this.supportingPokemon = [];
       return true;
